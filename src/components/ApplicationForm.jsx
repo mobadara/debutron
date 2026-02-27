@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { FiInfo } from 'react-icons/fi'
+import { FiCheckCircle, FiInfo } from 'react-icons/fi'
 import { Country, State } from 'country-state-city'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
@@ -7,6 +7,7 @@ import 'react-phone-input-2/lib/style.css'
 const initialFormData = {
 	firstName: '',
 	lastName: '',
+	gender: '',
 	email: '',
 	phone: '',
 	phoneDialCode: '',
@@ -18,6 +19,21 @@ const initialFormData = {
 	secondarySchool: '',
 	studyMode: '',
 	hardwareAccess: '',
+	guardianTitle: '',
+	guardianName: '',
+	guardianEmail: '',
+	guardianPhone: '',
+	guardianAddress: '',
+	nokTitle: '',
+	nokName: '',
+	nokEmail: '',
+	nokPhone: '',
+	nokAddress: '',
+	sponsorTitle: '',
+	sponsorName: '',
+	sponsorEmail: '',
+	sponsorPhone: '',
+	sponsorAddress: '',
 	strengths: '',
 	weaknesses: '',
 	highestEducation: '',
@@ -58,10 +74,23 @@ const getFlagEmoji = (isoCode) => {
 function ApplicationForm() {
 	const [step, setStep] = useState(1)
 	const [formData, setFormData] = useState(initialFormData)
+	const [isSubmitted, setIsSubmitted] = useState(false)
 	const [errors, setErrors] = useState({})
 	const [files, setFiles] = useState(initialFiles)
-	const [paymentMethod, setPaymentMethod] = useState('card')
+	const [currency, setCurrency] = useState('NGN')
+	const [promoCode, setPromoCode] = useState('')
+	const [discountAmount, setDiscountAmount] = useState(0)
+	const [isProcessing, setIsProcessing] = useState(false)
+	const [paymentSuccess, setPaymentSuccess] = useState(false)
+	const [promoError, setPromoError] = useState('')
+	const [sameAsAbove, setSameAsAbove] = useState(false)
 	const [referenceNumber, setReferenceNumber] = useState('')
+	const [submissionPaymentStatus, setSubmissionPaymentStatus] = useState('')
+
+	const baseFeeNGN = 10000
+	const baseFeeUSD = 10
+	const baseFee = currency === 'NGN' ? baseFeeNGN : baseFeeUSD
+	const finalAmount = Math.max(0, baseFee - discountAmount)
 
 	const countries = useMemo(
 		() => Country.getAllCountries().sort((firstCountry, secondCountry) => firstCountry.name.localeCompare(secondCountry.name)),
@@ -92,6 +121,69 @@ function ApplicationForm() {
 	useEffect(() => {
 		setReferenceNumber(generateReference())
 	}, [])
+
+	useEffect(() => {
+		if (!sameAsAbove) return
+
+		if (formData.programType === 'Academic Track') {
+			setFormData((prev) => ({
+				...prev,
+				sponsorTitle: prev.guardianTitle,
+				sponsorName: prev.guardianName,
+				sponsorEmail: prev.guardianEmail,
+				sponsorPhone: prev.guardianPhone,
+				sponsorAddress: prev.guardianAddress,
+			}))
+		}
+
+		if (formData.programType === 'Tech Innovation Track') {
+			setFormData((prev) => ({
+				...prev,
+				sponsorTitle: prev.nokTitle,
+				sponsorName: prev.nokName,
+				sponsorEmail: prev.nokEmail,
+				sponsorPhone: prev.nokPhone,
+				sponsorAddress: prev.nokAddress,
+			}))
+		}
+	}, [sameAsAbove, formData.programType, formData.guardianTitle, formData.guardianName, formData.guardianEmail, formData.guardianPhone, formData.guardianAddress, formData.nokTitle, formData.nokName, formData.nokEmail, formData.nokPhone, formData.nokAddress])
+
+	const toggleSameAsAbove = (event) => {
+		const checked = event.target.checked
+		setSameAsAbove(checked)
+
+		if (!checked) return
+
+		setFormData((prev) => ({
+			...prev,
+			sponsorTitle: prev.programType === 'Academic Track' ? prev.guardianTitle : prev.nokTitle,
+			sponsorName: prev.programType === 'Academic Track' ? prev.guardianName : prev.nokName,
+			sponsorEmail: prev.programType === 'Academic Track' ? prev.guardianEmail : prev.nokEmail,
+			sponsorPhone: prev.programType === 'Academic Track' ? prev.guardianPhone : prev.nokPhone,
+			sponsorAddress: prev.programType === 'Academic Track' ? prev.guardianAddress : prev.nokAddress,
+		}))
+	}
+
+	const handleApplyPromo = (event) => {
+		event.preventDefault()
+		if (promoCode.trim() === 'SCHOLAR100') {
+			setDiscountAmount(baseFee)
+			setPromoError('')
+			return
+		}
+
+		setDiscountAmount(0)
+		setPromoError('Invalid voucher code. Please check and try again.')
+	}
+
+	const updateCurrency = (newCurrency) => {
+		setCurrency(newCurrency)
+		setPaymentSuccess(false)
+
+		if (promoCode.trim() === 'SCHOLAR100') {
+			setDiscountAmount(newCurrency === 'NGN' ? baseFeeNGN : baseFeeUSD)
+		}
+	}
 
 	const updateField = (event) => {
 		const { name, value } = event.target
@@ -162,6 +254,7 @@ function ApplicationForm() {
 		if (step === 2) {
 			if (isBlank(formData.firstName)) stepErrors.firstName = 'Please enter your first name.'
 			if (isBlank(formData.lastName)) stepErrors.lastName = 'Please enter your last name.'
+			if (isBlank(formData.gender)) stepErrors.gender = 'Please select your sex/gender.'
 			if (isBlank(formData.email)) stepErrors.email = 'Please enter your email address.'
 			if (!isPhoneValid(formData.phone, formData.phoneDialCode)) stepErrors.phone = 'Please enter a valid phone number.'
 			if (isBlank(formData.streetAddress)) stepErrors.streetAddress = 'Please enter your street address.'
@@ -171,6 +264,30 @@ function ApplicationForm() {
 		}
 
 		if (step === 3) {
+			if (formData.programType === 'Academic Track') {
+				if (isBlank(formData.guardianTitle)) stepErrors.guardianTitle = 'Please select a title for the parent/guardian.'
+				if (isBlank(formData.guardianName)) stepErrors.guardianName = 'Please enter the parent/guardian full name.'
+				if (isBlank(formData.guardianEmail)) stepErrors.guardianEmail = 'Please enter the parent/guardian email.'
+				if (isBlank(formData.guardianPhone)) stepErrors.guardianPhone = 'Please enter the parent/guardian phone number.'
+				if (isBlank(formData.guardianAddress)) stepErrors.guardianAddress = 'Please enter the parent/guardian address.'
+			}
+
+			if (formData.programType === 'Tech Innovation Track') {
+				if (isBlank(formData.nokTitle)) stepErrors.nokTitle = 'Please select a title for next of kin.'
+				if (isBlank(formData.nokName)) stepErrors.nokName = 'Please enter the next of kin full name.'
+				if (isBlank(formData.nokEmail)) stepErrors.nokEmail = 'Please enter the next of kin email.'
+				if (isBlank(formData.nokPhone)) stepErrors.nokPhone = 'Please enter the next of kin phone number.'
+				if (isBlank(formData.nokAddress)) stepErrors.nokAddress = 'Please enter the next of kin address.'
+			}
+
+			if (isBlank(formData.sponsorTitle)) stepErrors.sponsorTitle = 'Please select a sponsor title.'
+			if (isBlank(formData.sponsorName)) stepErrors.sponsorName = 'Please enter the sponsor full name.'
+			if (isBlank(formData.sponsorEmail)) stepErrors.sponsorEmail = 'Please enter the sponsor email.'
+			if (isBlank(formData.sponsorPhone)) stepErrors.sponsorPhone = 'Please enter the sponsor phone number.'
+			if (isBlank(formData.sponsorAddress)) stepErrors.sponsorAddress = 'Please enter the sponsor address.'
+		}
+
+		if (step === 4) {
 			if (formData.programType === 'Academic Track' && isBlank(formData.secondarySchool)) {
 				stepErrors.secondarySchool = 'Please enter the name of your secondary school.'
 			}
@@ -179,11 +296,11 @@ function ApplicationForm() {
 			if (formData.programType === 'Tech Innovation Track' && isBlank(formData.hardwareAccess)) stepErrors.hardwareAccess = 'Please select your hardware access option.'
 		}
 
-		if (step === 4) {
+		if (step === 5) {
 			if (isBlank(formData.dateOfBirth)) stepErrors.dateOfBirth = 'Please select your date of birth.'
 		}
 
-		if (step === 5) {
+		if (step === 6) {
 			if (!files.passportPhoto) stepErrors.passportPhoto = 'Please upload your recent passport photograph.'
 			if (!files.governmentId) stepErrors.governmentId = 'Please upload a valid identification document.'
 			if (formData.programType === 'Academic Track' && !files.academicReferenceLetter) {
@@ -205,7 +322,7 @@ function ApplicationForm() {
 		}
 
 		setErrors({})
-		setStep((prev) => Math.min(prev + 1, 6))
+		setStep((prev) => Math.min(prev + 1, 7))
 	}
 	const prevStep = () => setStep((prev) => Math.max(prev - 1, 1))
 
@@ -213,15 +330,37 @@ function ApplicationForm() {
 		setFormData(initialFormData)
 		setErrors({})
 		setFiles(initialFiles)
-		setPaymentMethod('card')
+		setCurrency('NGN')
+		setPromoCode('')
+		setDiscountAmount(0)
+		setIsProcessing(false)
+		setPaymentSuccess(false)
+		setPromoError('')
+		setSameAsAbove(false)
 		setStep(1)
 		setReferenceNumber(generateReference())
 	}
 
-	const handlePaymentSubmit = (event) => {
-		event.preventDefault()
-		window.alert(`Payment successful.\nApplication submitted with reference: ${referenceNumber}`)
-		resetForm()
+	const handleSubmit = (event) => {
+		event?.preventDefault()
+
+		if (finalAmount > 0 && !paymentSuccess) {
+			setPromoError('Please complete payment to continue.')
+			return
+		}
+
+		setSubmissionPaymentStatus(finalAmount === 0 ? 'Scholarship Waived' : 'Paid')
+		setIsSubmitted(true)
+	}
+
+	const handleFlutterwavePayment = () => {
+		setIsProcessing(true)
+
+		setTimeout(() => {
+			setIsProcessing(false)
+			setPaymentSuccess(true)
+			handleSubmit()
+		}, 3000)
 	}
 
 	const summaryItems = useMemo(
@@ -235,6 +374,7 @@ function ApplicationForm() {
 				]
 				: []),
 			{ label: 'Full Name', value: `${formData.firstName} ${formData.lastName}`.trim() || '—' },
+			{ label: 'Sex / Gender', value: formData.gender || '—' },
 			{ label: 'Email', value: formData.email || '—' },
 			{ label: 'Phone', value: formData.phone ? `+${formData.phone}` : '—' },
 			{ label: 'Phone Country Code', value: formData.phoneDialCode || '—' },
@@ -242,6 +382,26 @@ function ApplicationForm() {
 			{ label: 'City', value: formData.city || '—' },
 			{ label: 'State/Province', value: selectedState?.name || (states.length > 0 ? '—' : 'Not applicable') },
 			{ label: 'Country', value: selectedCountry?.name || '—' },
+			...(formData.programType === 'Academic Track'
+				? [
+					{ label: 'Parent/Guardian Title', value: formData.guardianTitle || '—' },
+					{ label: 'Parent/Guardian Name', value: formData.guardianName || '—' },
+					{ label: 'Parent/Guardian Email', value: formData.guardianEmail || '—' },
+					{ label: 'Parent/Guardian Phone', value: formData.guardianPhone || '—' },
+					{ label: 'Parent/Guardian Address', value: formData.guardianAddress || '—' },
+				]
+				: [
+					{ label: 'Next of Kin Title', value: formData.nokTitle || '—' },
+					{ label: 'Next of Kin Name', value: formData.nokName || '—' },
+					{ label: 'Next of Kin Email', value: formData.nokEmail || '—' },
+					{ label: 'Next of Kin Phone', value: formData.nokPhone || '—' },
+					{ label: 'Next of Kin Address', value: formData.nokAddress || '—' },
+				]),
+			{ label: 'Sponsor Title', value: formData.sponsorTitle || '—' },
+			{ label: 'Sponsor Name', value: formData.sponsorName || '—' },
+			{ label: 'Sponsor Email', value: formData.sponsorEmail || '—' },
+			{ label: 'Sponsor Phone', value: formData.sponsorPhone || '—' },
+			{ label: 'Sponsor Address', value: formData.sponsorAddress || '—' },
 			...(formData.programType === 'Academic Track' ? [{ label: 'Secondary School', value: formData.secondarySchool || '—' }] : []),
 			{ label: 'Strengths', value: formData.strengths || '—' },
 			{ label: 'Weaknesses', value: formData.weaknesses || '—' },
@@ -253,23 +413,70 @@ function ApplicationForm() {
 
 	return (
 		<section className="mx-auto max-w-5xl px-6 py-12">
-			<header className="mb-8 text-center">
-				<h2 className="font-serif text-3xl font-bold text-debutron-navy md:text-4xl">Debutron Application Form</h2>
-				<p className="mt-3 font-sans text-gray-600">Complete all steps to finalize your admission request.</p>
-			</header>
+			{isSubmitted ? (
+				<div className="mx-auto max-w-3xl border border-gray-200 bg-white p-12 shadow-lg print:border-none print:shadow-none">
+					<div className="mb-8 text-center">
+						<p className="font-serif text-2xl font-bold text-debutron-navy">Debutron Lab</p>
+						<FiCheckCircle className="mx-auto mt-4 text-6xl text-green-700" />
+						<h2 className="mb-8 text-center font-serif text-3xl text-green-700">Application Successfully Submitted!</h2>
+					</div>
 
-			<div className="mb-8 flex flex-wrap justify-center gap-2 font-sans text-sm">
-				{[1, 2, 3, 4, 5, 6].map((index) => (
-					<span
-						key={index}
-						className={`rounded-full px-3 py-1 ${step === index ? 'bg-debutron-navy text-white' : 'bg-gray-100 text-gray-600'}`}
-					>
-						Step {index}
-					</span>
-				))}
-			</div>
+					<div className="grid gap-4 border border-gray-200 p-6 md:grid-cols-2">
+						<div>
+							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">Applicant Name</p>
+							<p className="font-sans text-sm text-gray-800">{`${formData.firstName} ${formData.lastName}`.trim() || '—'}</p>
+						</div>
+						<div>
+							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">Sex / Gender</p>
+							<p className="font-sans text-sm text-gray-800">{formData.gender || '—'}</p>
+						</div>
+						<div>
+							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">Application Reference Number</p>
+							<p className="font-mono text-lg font-bold text-debutron-navy">{referenceNumber}</p>
+						</div>
+						<div>
+							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">Program Track</p>
+							<p className="font-sans text-sm text-gray-800">{formData.programType || '—'}</p>
+						</div>
+						<div>
+							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">{formData.programType === 'Tech Innovation Track' ? 'Assigned Cohort' : 'Academic Session'}</p>
+							<p className="font-sans text-sm text-gray-800">{formData.programType === 'Tech Innovation Track' ? 'Batch A (Pending)' : '2026/2027'}</p>
+						</div>
+						<div>
+							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">Payment Status</p>
+							<p className="font-sans text-sm font-semibold text-green-700">{submissionPaymentStatus || 'Paid (or Scholarship Waived)'}</p>
+						</div>
+					</div>
 
-			<form onSubmit={handlePaymentSubmit} className="rounded-sm border border-gray-200 bg-white p-6 shadow-sm md:p-10">
+					<p className="mt-6 text-center font-sans text-sm text-gray-600">
+						An email with your login tracking link and receipt has been sent to your registered email address.
+					</p>
+
+					<div className="mt-8 text-center">
+						<button onClick={() => window.print()} className="rounded-sm bg-debutron-navy px-8 py-3 text-white print:hidden">
+							Print Application Slip
+						</button>
+					</div>
+				</div>
+			) : (
+				<>
+					<header className="mb-8 text-center">
+						<h2 className="font-serif text-3xl font-bold text-debutron-navy md:text-4xl">Debutron Application Form</h2>
+						<p className="mt-3 font-sans text-gray-600">Complete all steps to finalize your admission request.</p>
+					</header>
+
+					<div className="mb-8 flex flex-wrap justify-center gap-2 font-sans text-sm">
+						{[1, 2, 3, 4, 5, 6, 7].map((index) => (
+							<span
+								key={index}
+								className={`rounded-full px-3 py-1 ${step === index ? 'bg-debutron-navy text-white' : 'bg-gray-100 text-gray-600'}`}
+							>
+								Step {index}
+							</span>
+						))}
+					</div>
+
+					<form onSubmit={handleSubmit} className="rounded-sm border border-gray-200 bg-white p-6 shadow-sm md:p-10">
 				{step === 1 && (
 					<div className="space-y-6">
 						<h3 className="font-serif text-3xl text-debutron-navy mb-6 text-center">Select Your Pathway</h3>
@@ -315,7 +522,7 @@ function ApplicationForm() {
 				{step === 2 && (
 					<div className="space-y-6">
 						<h3 className="font-serif text-2xl text-debutron-navy">Personal Information</h3>
-						<div className="grid gap-5 md:grid-cols-2">
+						<div className="grid gap-5 md:grid-cols-3">
 							<div>
 								<FieldLabel text="First Name" hint="Enter your legal first name as it appears on your identification." />
 								<input name="firstName" value={formData.firstName} onChange={updateField} className={inputStyles} placeholder="Enter your first name" required />
@@ -325,6 +532,16 @@ function ApplicationForm() {
 								<FieldLabel text="Last Name" hint="Enter your legal surname as it appears on your identification." />
 								<input name="lastName" value={formData.lastName} onChange={updateField} className={inputStyles} placeholder="Enter your last name" required />
 								<FieldError message={errors.lastName} />
+							</div>
+							<div>
+								<FieldLabel text="Sex / Gender" />
+								<select name="gender" value={formData.gender} onChange={updateField} className={inputStyles} required>
+									<option value="">Select gender</option>
+									<option value="Male">Male</option>
+									<option value="Female">Female</option>
+									<option value="Prefer not to say">Prefer not to say</option>
+								</select>
+								<FieldError message={errors.gender} />
 							</div>
 						</div>
 
@@ -394,6 +611,132 @@ function ApplicationForm() {
 
 				{step === 3 && (
 					<div className="space-y-6">
+						<h3 className="mb-6 text-center font-serif text-3xl text-debutron-navy">Support &amp; Sponsorship Details</h3>
+
+						{formData.programType === 'Academic Track' && (
+							<div className="space-y-4">
+								<h4 className="font-serif text-xl text-debutron-navy">Parent / Guardian Information</h4>
+								<div className="grid gap-5 md:grid-cols-2">
+									<div>
+										<FieldLabel text="Title" />
+										<select name="guardianTitle" value={formData.guardianTitle} onChange={updateField} className={inputStyles}>
+											<option value="">Select title</option>
+											<option value="Mr">Mr</option>
+											<option value="Mrs">Mrs</option>
+											<option value="Ms">Ms</option>
+											<option value="Dr">Dr</option>
+										</select>
+										<FieldError message={errors.guardianTitle} />
+									</div>
+									<div>
+										<FieldLabel text="Full Name" />
+										<input name="guardianName" value={formData.guardianName} onChange={updateField} className={inputStyles} placeholder="Enter full name" />
+										<FieldError message={errors.guardianName} />
+									</div>
+									<div>
+										<FieldLabel text="Email" />
+										<input type="email" name="guardianEmail" value={formData.guardianEmail} onChange={updateField} className={inputStyles} placeholder="guardian@example.com" />
+										<FieldError message={errors.guardianEmail} />
+									</div>
+									<div>
+										<FieldLabel text="Phone Number" />
+										<input name="guardianPhone" value={formData.guardianPhone} onChange={updateField} className={inputStyles} placeholder="Enter phone number" />
+										<FieldError message={errors.guardianPhone} />
+									</div>
+									<div className="md:col-span-2">
+										<FieldLabel text="Full Residential Address" />
+										<textarea name="guardianAddress" value={formData.guardianAddress} onChange={updateField} rows={3} className={inputStyles} placeholder="Enter full address" />
+										<FieldError message={errors.guardianAddress} />
+									</div>
+								</div>
+							</div>
+						)}
+
+						{formData.programType === 'Tech Innovation Track' && (
+							<div className="space-y-4">
+								<h4 className="font-serif text-xl text-debutron-navy">Next of Kin Information</h4>
+								<div className="grid gap-5 md:grid-cols-2">
+									<div>
+										<FieldLabel text="Title" />
+										<select name="nokTitle" value={formData.nokTitle} onChange={updateField} className={inputStyles}>
+											<option value="">Select title</option>
+											<option value="Mr">Mr</option>
+											<option value="Mrs">Mrs</option>
+											<option value="Ms">Ms</option>
+											<option value="Dr">Dr</option>
+										</select>
+										<FieldError message={errors.nokTitle} />
+									</div>
+									<div>
+										<FieldLabel text="Full Name" />
+										<input name="nokName" value={formData.nokName} onChange={updateField} className={inputStyles} placeholder="Enter full name" />
+										<FieldError message={errors.nokName} />
+									</div>
+									<div>
+										<FieldLabel text="Email" />
+										<input type="email" name="nokEmail" value={formData.nokEmail} onChange={updateField} className={inputStyles} placeholder="nok@example.com" />
+										<FieldError message={errors.nokEmail} />
+									</div>
+									<div>
+										<FieldLabel text="Phone Number" />
+										<input name="nokPhone" value={formData.nokPhone} onChange={updateField} className={inputStyles} placeholder="Enter phone number" />
+										<FieldError message={errors.nokPhone} />
+									</div>
+									<div className="md:col-span-2">
+										<FieldLabel text="Full Residential Address" />
+										<textarea name="nokAddress" value={formData.nokAddress} onChange={updateField} rows={3} className={inputStyles} placeholder="Enter full address" />
+										<FieldError message={errors.nokAddress} />
+									</div>
+								</div>
+							</div>
+						)}
+
+						<div className="mt-8 border-t border-gray-200 pt-6">
+							<h4 className="font-serif text-xl text-debutron-navy">Financial Sponsor Details</h4>
+							<label className="mt-3 flex items-center gap-2 font-sans text-sm text-gray-700">
+								<input type="checkbox" checked={sameAsAbove} onChange={toggleSameAsAbove} />
+								Same as above
+							</label>
+
+							<div className="mt-4 grid gap-5 md:grid-cols-2">
+								<div>
+									<FieldLabel text="Title" />
+									<select name="sponsorTitle" value={formData.sponsorTitle} onChange={updateField} className={inputStyles} disabled={sameAsAbove}>
+										<option value="">Select title</option>
+										<option value="Mr">Mr</option>
+										<option value="Mrs">Mrs</option>
+										<option value="Ms">Ms</option>
+										<option value="Dr">Dr</option>
+									</select>
+									<FieldError message={errors.sponsorTitle} />
+								</div>
+								<div>
+									<FieldLabel text="Full Name" />
+									<input name="sponsorName" value={formData.sponsorName} onChange={updateField} className={inputStyles} placeholder="Enter full name" disabled={sameAsAbove} />
+									<FieldError message={errors.sponsorName} />
+								</div>
+								<div>
+									<FieldLabel text="Email" />
+									<input type="email" name="sponsorEmail" value={formData.sponsorEmail} onChange={updateField} className={inputStyles} placeholder="sponsor@example.com" disabled={sameAsAbove} />
+									<FieldError message={errors.sponsorEmail} />
+								</div>
+								<div>
+									<FieldLabel text="Phone Number" />
+									<input name="sponsorPhone" value={formData.sponsorPhone} onChange={updateField} className={inputStyles} placeholder="Enter phone number" disabled={sameAsAbove} />
+									<FieldError message={errors.sponsorPhone} />
+								</div>
+								<div className="md:col-span-2">
+									<FieldLabel text="Address" />
+									<textarea name="sponsorAddress" value={formData.sponsorAddress} onChange={updateField} rows={3} className={inputStyles} placeholder="Enter full sponsor address" disabled={sameAsAbove} />
+									<FieldError message={errors.sponsorAddress} />
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{step === 4 && (
+					<div className="space-y-6">
 						<h3 className="font-serif text-2xl text-debutron-navy">Academic &amp; Logistical Details</h3>
 						{formData.programType === 'Academic Track' && (
 							<div>
@@ -462,7 +805,7 @@ function ApplicationForm() {
 					</div>
 				)}
 
-				{step === 4 && (
+				{step === 5 && (
 					<div className="space-y-6">
 						<h3 className="font-serif text-2xl text-debutron-navy">Holistic Student Profiling</h3>
 						<div>
@@ -485,7 +828,7 @@ function ApplicationForm() {
 					</div>
 				)}
 
-				{step === 5 && (
+				{step === 6 && (
 					<div className="space-y-6">
 						<h3 className="font-serif text-2xl text-debutron-navy">Required Documents</h3>
 						<p className="font-sans text-sm text-gray-600">Accepted formats: PDF, JPG, PNG.</p>
@@ -526,7 +869,7 @@ function ApplicationForm() {
 					</div>
 				)}
 
-				{step === 6 && (
+				{step === 7 && (
 					<div className="mx-auto max-w-4xl space-y-8">
 						<section>
 							<h3 className="mb-4 font-serif text-2xl text-debutron-navy">Application Preview</h3>
@@ -559,22 +902,81 @@ function ApplicationForm() {
 						</section>
 
 						<section>
-							<h3 className="mb-4 font-serif text-2xl text-debutron-navy">Application Processing Fee</h3>
-							<div className="rounded-sm border-t-4 border-debutron-navy bg-gray-50 p-8 text-center shadow-md">
-								<p className="mb-2 font-sans text-lg text-gray-700">Your Application Reference: <span className="font-bold text-debutron-navy">{referenceNumber}</span></p>
-								<p className="mb-4 font-sans text-sm text-gray-600">Please save this number for payment verification and future tracking.</p>
-								<p className="mb-6 font-sans text-2xl font-bold text-gray-900">Processing Fee: ₦10,000</p>
-
-								<div className="mx-auto grid max-w-2xl gap-4 md:grid-cols-2">
-									<label className={`flex cursor-pointer items-center justify-between rounded-sm border px-4 py-3 font-sans ${paymentMethod === 'card' ? 'border-debutron-navy bg-white' : 'border-gray-300 bg-white'}`}>
-										<span className="font-bold text-debutron-navy">Pay with Card</span>
-										<input type="radio" name="paymentMethod" value="card" checked={paymentMethod === 'card'} onChange={(event) => setPaymentMethod(event.target.value)} />
-									</label>
-									<label className={`flex cursor-pointer items-center justify-between rounded-sm border px-4 py-3 font-sans ${paymentMethod === 'gateway' ? 'border-debutron-navy bg-white' : 'border-gray-300 bg-white'}`}>
-										<span className="font-bold text-debutron-navy">Paystack / Flutterwave</span>
-										<input type="radio" name="paymentMethod" value="gateway" checked={paymentMethod === 'gateway'} onChange={(event) => setPaymentMethod(event.target.value)} />
-									</label>
+							<div className="mt-8 border-t-4 border-debutron-navy bg-gray-50 p-8">
+								<div className="mb-6 flex items-center gap-3">
+									<button
+										type="button"
+										onClick={() => updateCurrency('NGN')}
+										className={`rounded-sm px-4 py-2 font-sans text-sm font-bold ${currency === 'NGN' ? 'bg-debutron-navy text-white' : 'bg-white text-gray-700 border border-gray-300'}`}
+									>
+										NGN
+									</button>
+									<button
+										type="button"
+										onClick={() => updateCurrency('USD')}
+										className={`rounded-sm px-4 py-2 font-sans text-sm font-bold ${currency === 'USD' ? 'bg-debutron-navy text-white' : 'bg-white text-gray-700 border border-gray-300'}`}
+									>
+										USD
+									</button>
 								</div>
+
+								<div className="mb-4">
+									<FieldLabel text="Institutional Voucher / Scholarship Code" hint="If you are sponsored by an NGO or partner, enter your code here." />
+									<div className="flex flex-col gap-2 md:flex-row">
+										<input
+											type="text"
+											value={promoCode}
+											onChange={(event) => {
+												setPromoCode(event.target.value)
+												setDiscountAmount(0)
+												setPromoError('')
+											}}
+											className={inputStyles}
+											placeholder="Enter voucher code"
+										/>
+										<button type="button" onClick={handleApplyPromo} className="bg-debutron-navy px-4 py-2 font-sans font-bold text-white">
+											Apply
+										</button>
+									</div>
+									{finalAmount === 0 && <p className="mt-2 font-sans text-sm font-semibold text-green-700">Voucher applied successfully! Fee waived.</p>}
+									{finalAmount > 0 && promoError && <p className="mt-2 font-sans text-sm font-semibold text-red-600">{promoError}</p>}
+								</div>
+
+								<p className="font-sans text-sm text-gray-700">Application Ref: <span className="font-bold text-debutron-navy">{referenceNumber}</span></p>
+								<p className="mt-4 font-sans text-3xl font-bold text-gray-900">Processing Fee: {currency === 'NGN' ? '₦' : '$'}{finalAmount}</p>
+
+								{finalAmount === 0 && (
+									<div className="mt-6 rounded-sm border border-green-200 bg-green-50 p-4">
+										<p className="font-sans font-semibold text-green-700">100% Scholarship Applied. No payment required.</p>
+										<button
+											type="button"
+											onClick={handleSubmit}
+											className="mt-4 w-full rounded-sm bg-green-700 py-4 font-sans text-lg font-bold text-white"
+										>
+											Complete Enrollment
+										</button>
+									</div>
+								)}
+
+								{finalAmount > 0 && !isProcessing && (
+									<div className="mt-6 rounded-sm border border-gray-200 bg-white p-8 text-center shadow-sm">
+										<p className="mb-3 font-sans text-sm font-semibold text-gray-700">Visa • Mastercard • Verve • Amex</p>
+										<button
+											type="button"
+											onClick={handleFlutterwavePayment}
+											className="w-full rounded-sm bg-debutron-navy px-8 py-4 font-sans text-lg font-bold text-white transition-colors hover:bg-debutron-charcoal"
+										>
+											Pay {currency === 'NGN' ? '₦' : '$'}{finalAmount} Securely via Flutterwave
+										</button>
+									</div>
+								)}
+
+								{isProcessing && (
+									<div className="mt-6 rounded-sm border border-gray-200 bg-white p-8 text-center shadow-sm">
+										<div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-debutron-navy" />
+										<p className="animate-pulse font-sans text-gray-600">Processing secure payment with Flutterwave... Please do not close this window.</p>
+									</div>
+								)}
 							</div>
 						</section>
 					</div>
@@ -590,7 +992,7 @@ function ApplicationForm() {
 						Back
 					</button>
 
-					{step < 6 ? (
+					{step < 7 ? (
 						<button
 							type="button"
 							onClick={nextStep}
@@ -598,16 +1000,11 @@ function ApplicationForm() {
 						>
 							Continue
 						</button>
-					) : (
-						<button
-							type="submit"
-							className="w-full rounded-sm bg-green-700 px-10 py-4 font-sans text-lg font-bold text-white shadow-md transition-colors hover:bg-green-800 md:w-auto"
-						>
-							Pay & Submit Application
-						</button>
-					)}
+					) : <span />}
 				</div>
-			</form>
+					</form>
+				</>
+			)}
 		</section>
 	)
 }

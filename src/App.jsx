@@ -37,6 +37,7 @@ import NewsDetail from './pages/NewsDetail'
 import EventsPage from './pages/EventsPage'
 import EventDetail from './pages/EventDetail'
 import ApplicationForm from './components/ApplicationForm'
+import ConsultationBooking from './components/ConsultationBooking'
 
 function App() {
 	return (
@@ -77,6 +78,7 @@ function App() {
 				<Route path="/student-showcase" element={<StudentShowcase />} />
 				<Route path="/pearson-vue" element={<PearsonVue />} />
 				<Route path="/educational-consulting" element={<EduConsulting />} />
+				<Route path="/educational-consulting/book-consultation" element={<ConsultationBooking />} />
 				<Route path="/exam-registration" element={<ExamRegistration />} />
 				<Route path="/o-level-mastery" element={<OLevelMastery />} />
 				<Route path="/contact" element={<Contact />} />

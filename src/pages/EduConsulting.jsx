@@ -48,7 +48,7 @@ function EduConsulting() {
 						Speak directly with our Lead Instructor or Head of Studies.
 					</p>
 					<Link
-						to="/contact"
+						to="/educational-consulting/book-consultation"
 						className="inline-block rounded-sm bg-debutron-navy px-8 py-3 font-sans font-bold text-white transition-colors hover:bg-debutron-charcoal"
 					>
 						Book an Appointment
