@@ -38,6 +38,8 @@ import EventsPage from './pages/EventsPage'
 import EventDetail from './pages/EventDetail'
 import ApplicationForm from './components/ApplicationForm'
 import ConsultationBooking from './components/ConsultationBooking'
+import StudentLogin from './pages/StudentLogin'
+import StaffLogin from './pages/StaffLogin'
 
 function App() {
 	return (
@@ -82,6 +84,8 @@ function App() {
 				<Route path="/exam-registration" element={<ExamRegistration />} />
 				<Route path="/o-level-mastery" element={<OLevelMastery />} />
 				<Route path="/contact" element={<Contact />} />
+				<Route path="/portal/student-login" element={<StudentLogin />} />
+				<Route path="/portal/staff-login" element={<StaffLogin />} />
 				<Route path="/news" element={<NewsPage />} />
 				<Route path="/news/:id" element={<NewsDetail />} />
 				<Route path="/events" element={<EventsPage />} />
