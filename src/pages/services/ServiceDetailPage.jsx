@@ -1,9 +1,9 @@
 import { useParams, Link } from 'react-router-dom'
-import { servicessWithDetails } from '../../data/siteContent'
+import { serviceItems } from '../../data/public/servicesData'
 
 function ServiceDetailPage() {
 	const { serviceId } = useParams()
-	const service = servicessWithDetails.find((s) => s.id === serviceId)
+	const service = serviceItems.find((s) => s.id === serviceId)
 
 	if (!service) {
 		return (

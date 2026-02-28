@@ -1,9 +1,8 @@
 import { useParams, Link } from 'react-router-dom'
-import { academicTracks, ictTracks } from '../../data/siteContent'
+import { allPrograms } from '../../data/public/programsData'
 
 function ProgramDetailPage() {
 	const { programId } = useParams()
-	const allPrograms = [...academicTracks, ...ictTracks]
 	const program = allPrograms.find((p) => p.id === programId)
 
 	if (!program) {

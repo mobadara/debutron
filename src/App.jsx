@@ -13,6 +13,7 @@ import StaffLogin from './pages/StaffLogin'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentTranscript from './pages/StudentTranscript'
 import StudentCourses from './pages/StudentCourses'
+import CourseDetail from './pages/CourseDetail'
 import GraduationHub from './pages/GraduationHub'
 import StudentTuition from './pages/StudentTuition'
 import StudentProfile from './pages/StudentProfile'
@@ -37,7 +38,7 @@ const PortalLayout = () => {
 	const [sidebarOpen, setSidebarOpen] = useState(() => {
 		try {
 			return localStorage.getItem('portalSidebarOpen') === 'true'
-		} catch (e) {
+		} catch {
 			return false
 		}
 	})
@@ -45,7 +46,7 @@ const PortalLayout = () => {
 	useEffect(() => {
 		try {
 			localStorage.setItem('portalSidebarOpen', sidebarOpen)
-		} catch (e) {
+		} catch {
 			// ignore
 		}
 	}, [sidebarOpen])
@@ -88,6 +89,7 @@ function App() {
 					<Route path="/student/dashboard" element={<StudentDashboard />} />
 					<Route path="/student/transcript" element={<StudentTranscript />} />
 					<Route path="/student/courses" element={<StudentCourses />} />
+					<Route path="/student/courses/:id" element={<CourseDetail />} />
 					<Route path="/student/graduation" element={<GraduationHub />} />
 					<Route path="/student/tuition" element={<StudentTuition />} />
 					<Route path="/student/profile" element={<StudentProfile />} />

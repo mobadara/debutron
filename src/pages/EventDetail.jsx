@@ -1,11 +1,11 @@
 import { FiCalendar, FiClock, FiMapPin } from 'react-icons/fi'
 import { Link, useParams } from 'react-router-dom'
-import { eventsData } from '../data/siteContent'
+import { eventItems } from '../data/public/eventsData'
 
 function EventDetail() {
 	const { id } = useParams()
 	const parsedId = Number.parseInt(id, 10)
-	const event = eventsData.find((item) => item.id === parsedId || item.id === id)
+	const event = eventItems.find((item) => item.id === parsedId || item.id === id)
 
 	const handleAddToCalendar = () => {
 		alert('Calendar integration coming soon!')

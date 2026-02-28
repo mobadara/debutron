@@ -1,10 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
-import { newsData } from '../data/siteContent'
+import { newsItems, newsPageData } from '../data/public/newsData'
 
 function NewsDetail() {
 	const { id } = useParams()
 	const parsedId = Number.parseInt(id, 10)
-	const article = newsData.find((item) => item.id === id || item.id === parsedId)
+	const article = newsItems.find((item) => item.id === id || item.id === parsedId)
 
 	if (!article) {
 		return (
@@ -43,7 +43,7 @@ function NewsDetail() {
 				</h1>
 
 				<span className="mb-8 block border-b border-gray-200 pb-6 font-sans text-sm uppercase tracking-widest text-gray-500">
-					{article.date} • By Debutron Lab Communications
+					{article.date} • By {newsPageData.authorLabel}
 				</span>
 
 				<p className="whitespace-pre-line font-sans text-lg leading-relaxed text-gray-800">

@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom'
-import { newsData } from '../data/siteContent'
+import { newsItems, newsPageData } from '../data/public/newsData'
 
 function NewsPage() {
 	return (
 		<div className="bg-debutron-gray text-debutron-charcoal">
 			<section className="bg-debutron-navy px-6 py-16 text-center text-white">
-				<h1 className="font-serif text-4xl font-bold">News &amp; Announcements</h1>
+				<h1 className="font-serif text-4xl font-bold">{newsPageData.title}</h1>
 			</section>
 
 			<section className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-2 lg:grid-cols-3">
-				{newsData.map((item) => (
+				{newsItems.map((item) => (
 					<article key={item.id} className="overflow-hidden rounded-sm border border-gray-100 bg-white shadow-sm">
 						<img className="h-48 w-full object-cover" src={item.image} alt={item.title} />
 						<div className="p-5">
