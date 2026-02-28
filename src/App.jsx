@@ -1,99 +1,57 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import MainLayout from './components/layout/MainLayout'
-import AboutPage from './pages/AboutPage'
-import Contact from './pages/Contact'
-import HomePage from './pages/HomePage'
-import NotFoundPage from './pages/NotFoundPage'
-import LeadershipTeam from './pages/LeadershipTeam'
-import StaffDirectoryPage from './pages/StaffDirectoryPage'
+import { BrowserRouter as Router, Outlet, Route, Routes } from 'react-router-dom'
+import Navbar from './components/layout/Header'
+import Footer from './components/layout/Footer'
+import TopUtilityBar from './components/layout/TopUtilityBar'
+import PortalHeader from './components/layout/PortalHeader'
+import PortalFooter from './components/layout/PortalFooter'
+import Home from './pages/HomePage'
 import Admissions from './pages/Admissions'
-import VisionValues from './pages/VisionValues'
-import InnovationLab from './pages/InnovationLab'
-import Accreditations from './pages/Accreditations'
-import Careers from './pages/Careers'
-import ProgramsMainPage from './pages/programs/ProgramsMainPage'
-import AcademicsPage from './pages/programs/AcademicsPage'
-import IctPage from './pages/programs/IctPage'
-import ProgramDetailPage from './pages/programs/ProgramDetailPage'
-import ServicesMainPage from './pages/services/ServicesMainPage'
-import ServiceDetailPage from './pages/services/ServiceDetailPage'
-import AiDataModels from './pages/AiDataModels'
-import EnterpriseConsulting from './pages/EnterpriseConsulting'
-import StudentShowcase from './pages/StudentShowcase'
-import PearsonVue from './pages/PearsonVue'
-import EduConsulting from './pages/EduConsulting'
-import ExamRegistration from './pages/ExamRegistration'
-import OLevelMastery from './pages/OLevelMastery'
-import UtmeAccelerator from './pages/UtmeAccelerator'
-import ALevelExcellence from './pages/ALevelExcellence'
-import DataScience from './pages/DataScience'
-import SoftwareEngineering from './pages/SoftwareEngineering'
-import DataAnalytics from './pages/DataAnalytics'
-import CloudEngineering from './pages/CloudEngineering'
-import CyberSecurity from './pages/CyberSecurity'
-import TechTracks from './pages/TechTracks'
-import NewsPage from './pages/NewsPage'
-import NewsDetail from './pages/NewsDetail'
-import EventsPage from './pages/EventsPage'
-import EventDetail from './pages/EventDetail'
-import ApplicationForm from './components/ApplicationForm'
-import ConsultationBooking from './components/ConsultationBooking'
 import StudentLogin from './pages/StudentLogin'
 import StaffLogin from './pages/StaffLogin'
+import StudentDashboard from './pages/StudentDashboard'
+
+const MainLayout = () => (
+	<div className="flex flex-col min-h-screen">
+		<TopUtilityBar />
+		<Navbar />
+		<main className="flex-grow">
+			<Outlet />
+		</main>
+		<Footer />
+	</div>
+)
+
+const PortalLayout = () => (
+	<div className="min-h-screen flex flex-col bg-gray-50">
+		<PortalHeader />
+		<main className="flex-grow flex">
+			<div className="flex-1 overflow-y-auto">
+				<Outlet />
+			</div>
+		</main>
+		<PortalFooter />
+	</div>
+)
 
 function App() {
 	return (
-		<Routes>
-			<Route element={<MainLayout />}>
-				<Route path="/" element={<HomePage />} />
-				<Route path="/about" element={<AboutPage />} />
-				<Route path="/who-we-are" element={<VisionValues />} />
-				<Route path="/leadership" element={<LeadershipTeam />} />
-				<Route path="/innovation-lab" element={<InnovationLab />} />
-				<Route path="/accreditations-partnerships" element={<Accreditations />} />
-				<Route path="/careers" element={<Careers />} />
-				<Route path="/staff-directory" element={<StaffDirectoryPage />} />
-				<Route path="/admissions" element={<Admissions />} />
-				<Route path="/apply" element={<ApplicationForm />} />
-				<Route path="/programs" element={<ProgramsMainPage />} />
-				<Route path="/programs/tech-tracks" element={<TechTracks />} />
-				<Route path="/programs/academics" element={<AcademicsPage />} />
-				<Route path="/programs/ict" element={<IctPage />} />
-				<Route path="/programs/data-science" element={<Navigate to="/applied-data-science" replace />} />
-				<Route path="/programs/software-engineering" element={<Navigate to="/full-stack-software-engineering" replace />} />
-				<Route path="/programs/data-analytics" element={<Navigate to="/data-analytics-insights" replace />} />
-				<Route path="/programs/cloud-engineering" element={<Navigate to="/cloud-infrastructure-engineering" replace />} />
-				<Route path="/programs/cyber-security" element={<Navigate to="/cyber-defense-security" replace />} />
-				<Route path="/programs/utme-accelerator" element={<Navigate to="/utme-accelerator" replace />} />
-				<Route path="/programs/:programId" element={<ProgramDetailPage />} />
-				<Route path="/a-level-excellence" element={<ALevelExcellence />} />
-				<Route path="/utme-accelerator" element={<UtmeAccelerator />} />
-				<Route path="/applied-data-science" element={<DataScience />} />
-				<Route path="/data-analytics-insights" element={<DataAnalytics />} />
-				<Route path="/cloud-infrastructure-engineering" element={<CloudEngineering />} />
-				<Route path="/cyber-defense-security" element={<CyberSecurity />} />
-				<Route path="/full-stack-software-engineering" element={<SoftwareEngineering />} />
-				<Route path="/services" element={<ServicesMainPage />} />
-				<Route path="/services/:serviceId" element={<ServiceDetailPage />} />
-				<Route path="/ai-data-models" element={<AiDataModels />} />
-				<Route path="/enterprise-consulting" element={<EnterpriseConsulting />} />
-				<Route path="/student-showcase" element={<StudentShowcase />} />
-				<Route path="/pearson-vue" element={<PearsonVue />} />
-				<Route path="/educational-consulting" element={<EduConsulting />} />
-				<Route path="/educational-consulting/book-consultation" element={<ConsultationBooking />} />
-				<Route path="/exam-registration" element={<ExamRegistration />} />
-				<Route path="/o-level-mastery" element={<OLevelMastery />} />
-				<Route path="/contact" element={<Contact />} />
-				<Route path="/portal/student-login" element={<StudentLogin />} />
-				<Route path="/portal/staff-login" element={<StaffLogin />} />
-				<Route path="/news" element={<NewsPage />} />
-				<Route path="/news/:id" element={<NewsDetail />} />
-				<Route path="/events" element={<EventsPage />} />
-				<Route path="/events/:id" element={<EventDetail />} />
-				<Route path="*" element={<NotFoundPage />} />
-			</Route>
-		</Routes>
+		<Router>
+			<Routes>
+				<Route element={<MainLayout />}>
+					<Route path="/" element={<Home />} />
+					<Route path="/admissions" element={<Admissions />} />
+				</Route>
+
+				<Route path="/login/student" element={<StudentLogin />} />
+				<Route path="/login/staff" element={<StaffLogin />} />
+
+				<Route element={<PortalLayout />}>
+					{/* TODO: Wrap this PortalLayout group in a <ProtectedRoute> component once FastAPI JWT authentication is ready. */}
+					<Route path="/student/dashboard" element={<StudentDashboard />} />
+				</Route>
+			</Routes>
+		</Router>
 	)
 }
 
-export default App;
+export default App

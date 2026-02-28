@@ -16,10 +16,10 @@ function TopUtilityBar() {
 						<span aria-hidden="true">▾</span>
 					</button>
 					<div className="invisible absolute top-full right-0 z-20 mt-2 w-max max-w-[90vw] rounded border border-white/20 bg-debutron-navy/95 p-1 opacity-0 shadow-lg transition-all duration-150 group-hover:visible group-hover:opacity-100 sm:max-w-md md:right-auto md:left-0">
-						<Link className="block rounded px-3 py-2 text-sm text-white transition-colors duration-200 hover:bg-white/10 hover:text-gray-300" to="/portal/student-login">
+						<Link className="block rounded px-3 py-2 text-sm text-white transition-colors duration-200 hover:bg-white/10 hover:text-gray-300" to="/login/student">
 							Student
 						</Link>
-						<Link className="block rounded px-3 py-2 text-sm text-white transition-colors duration-200 hover:bg-white/10 hover:text-gray-300" to="/portal/staff-login">
+						<Link className="block rounded px-3 py-2 text-sm text-white transition-colors duration-200 hover:bg-white/10 hover:text-gray-300" to="/login/staff">
 							Staff
 						</Link>
 					</div>
