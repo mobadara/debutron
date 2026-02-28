@@ -2,11 +2,13 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   FiGrid,
+  FiBook,
   FiBookOpen,
   FiFileText,
   FiCalendar,
   FiBriefcase,
   FiCreditCard,
+  FiSettings,
   FiUser,
   FiX,
 } from 'react-icons/fi'
@@ -14,11 +16,13 @@ import {
 const links = [
   { to: '/student/dashboard', label: 'Dashboard', icon: FiGrid },
   { to: '/student/courses', label: 'Course Schedule', icon: FiBookOpen },
+  { to: '/student/elibrary', label: 'Digital eLibrary', icon: FiBook },
   { to: '/student/transcript', label: 'Transcripts & Scores', icon: FiFileText },
   { to: '/student/calendar', label: 'Academic Calendar', icon: FiCalendar },
   { to: '/student/graduation', label: 'Graduation & Careers', icon: FiBriefcase },
   { to: '/student/tuition', label: 'Tuition & Finance', icon: FiCreditCard },
   { to: '/student/profile', label: 'My Profile', icon: FiUser },
+  { to: '/student/settings', label: 'Account Settings', icon: FiSettings },
 ]
 
 export default function PortalSidebar({ open = false, onClose = () => {} }) {

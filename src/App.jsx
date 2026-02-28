@@ -17,6 +17,8 @@ import GraduationHub from './pages/GraduationHub'
 import StudentTuition from './pages/StudentTuition'
 import StudentProfile from './pages/StudentProfile'
 import StudentCalendar from './pages/StudentCalendar'
+import StudentLibrary from './pages/StudentLibrary'
+import StudentSettings from './pages/StudentSettings'
 import NotFoundPage from './pages/NotFoundPage'
 // (imports above already include StudentTuition and StudentProfile)
 
@@ -90,6 +92,8 @@ function App() {
 					<Route path="/student/tuition" element={<StudentTuition />} />
 					<Route path="/student/profile" element={<StudentProfile />} />
 					<Route path="/student/calendar" element={<StudentCalendar />} />
+					<Route path="/student/elibrary" element={<StudentLibrary />} />
+					<Route path="/student/settings" element={<StudentSettings />} />
 				</Route>
 
 				{/* GLOBAL 404 (catch-all) */}
