@@ -29,13 +29,17 @@ function getGradeClass(grade) {
 }
 
 export default function StudentTranscript() {
+  const studentTrack = 'Tech Innovation Track'
+
   const average = modules.reduce((s, m) => s + (Number(m.score) || 0), 0) / modules.length
   const avgFormatted = `${average.toFixed(1)}%`
 
   return (
     <div className="max-w-6xl mx-auto p-8">
       <header>
-        <h2 className="font-serif text-3xl text-debutron-navy mb-6">Academic Transcript &amp; Scores</h2>
+        <h2 className="font-serif text-3xl text-debutron-navy mb-6">
+          {studentTrack === 'Academic Track' ? 'Academic Transcript & Scores' : 'Official Transcript & Scores'}
+        </h2>
 
           <div className="bg-debutron-navy text-white p-6 rounded-sm flex justify-between items-center mb-8 shadow-md">
           <div>
@@ -55,7 +59,9 @@ export default function StudentTranscript() {
       </header>
 
       <section>
-        <h3 className="font-serif text-xl mb-4">Module Breakdown</h3>
+        <h3 className="font-serif text-xl mb-4">
+          {studentTrack === 'Academic Track' ? 'Subject Breakdown' : 'Module Breakdown'}
+        </h3>
 
         <div className="bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden">
           <table className="w-full table-auto">

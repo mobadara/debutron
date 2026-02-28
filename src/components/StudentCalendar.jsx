@@ -20,6 +20,8 @@ const mockEvents = [
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function StudentCalendar() {
+	const studentTrack = 'Tech Innovation Track'
+
 	const handleExportICS = (event) => {
 		void event
 		alert('Downloading .ics file for your calendar app...')
@@ -28,7 +30,9 @@ function StudentCalendar() {
 	return (
 		<section className="bg-gray-50 p-6 font-sans md:p-8">
 			<div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-				<h2 className="font-serif text-3xl text-debutron-navy mb-6 md:mb-0">Academic Calendar</h2>
+				<h2 className="font-serif text-3xl text-debutron-navy mb-6 md:mb-0">
+					{studentTrack === 'Academic Track' ? 'Academic Calendar' : 'Campus Calendar'}
+				</h2>
 				<button
 					type="button"
 					className="rounded-sm bg-debutron-navy px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"

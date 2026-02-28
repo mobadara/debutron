@@ -22,6 +22,8 @@ const links = [
 ]
 
 export default function PortalSidebar({ open = false, onClose = () => {} }) {
+  const studentTrack = 'Tech Innovation Track' // Swap to 'Academic Track' to test
+
   const base =
     'flex items-center gap-3 px-4 py-3 rounded-sm font-sans text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors'
   const active = 'bg-white/10 text-white border-l-4 border-blue-400'
@@ -34,7 +36,17 @@ export default function PortalSidebar({ open = false, onClose = () => {} }) {
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} className={({ isActive }) => `${base} ${isActive ? active : ''}`}>
               <Icon className="h-4 w-4" aria-hidden="true" />
-              <span>{label}</span>
+              <span>
+                {to === '/student/calendar'
+                  ? studentTrack === 'Academic Track'
+                    ? 'Academic Calendar'
+                    : 'Calendar'
+                  : to === '/student/transcript'
+                    ? studentTrack === 'Academic Track'
+                      ? 'Academic Transcript'
+                      : 'Transcripts & Scores'
+                    : label}
+              </span>
             </NavLink>
           ))}
         </nav>
@@ -67,7 +79,17 @@ export default function PortalSidebar({ open = false, onClose = () => {} }) {
                 className={({ isActive }) => `${base} ${isActive ? active : ''}`}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
-                <span>{label}</span>
+                <span>
+                  {to === '/student/calendar'
+                    ? studentTrack === 'Academic Track'
+                      ? 'Academic Calendar'
+                      : 'Calendar'
+                    : to === '/student/transcript'
+                      ? studentTrack === 'Academic Track'
+                        ? 'Academic Transcript'
+                        : 'Transcripts & Scores'
+                      : label}
+                </span>
               </NavLink>
             ))}
           </nav>

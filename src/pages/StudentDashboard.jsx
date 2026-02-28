@@ -1,23 +1,35 @@
 import React from 'react'
 
-const studentTrack = 'Tech Innovation Track' // Swap to "Academic Track" to test UI
-
 function StudentDashboard() {
+  const studentTrack = 'Tech Innovation Track'
+  const studyMode = 'Onsite (Ibadan Hub)' // Swap to "Online Remote" to test
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       <div className="max-w-7xl mx-auto p-8">
         <header>
           <h1 className="font-serif text-4xl font-bold text-debutron-navy">Welcome back, Muyiwa.</h1>
 
-          <div className="flex items-center gap-4 mt-3 mb-8">
+          <div className="mt-3 mb-8">
             <span className="bg-debutron-navy text-white px-4 py-1.5 rounded-sm font-mono text-sm tracking-widest font-bold shadow-sm">ID: 000001</span>
-            <p className="text-gray-600 font-sans">Tech Innovation Track - Applied Data Science | Cohort Alpha</p>
+
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-gray-600 font-sans">
+              <span>Tech Innovation Track - Applied Data Science | Cohort Alpha</span>
+              {studentTrack === 'Tech Innovation Track' && (
+                <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-sm text-xs font-bold tracking-wide">
+                  <span className={`w-2 h-2 rounded-full ${studyMode.includes('Online') ? 'bg-green-500' : 'bg-blue-600'}`}></span>
+                  {studyMode}
+                </span>
+              )}
+            </div>
           </div>
         </header>
 
         <section className="grid grid-cols-1 gap-6 mb-10 md:grid-cols-3">
           <article className="border-t-4 border-blue-500 bg-white p-6 shadow-sm">
-            <h3 className="mb-4 font-serif text-xl font-semibold text-debutron-navy">Academic Progress</h3>
+            <h3 className="mb-4 font-serif text-xl font-semibold text-debutron-navy">
+              {studentTrack === 'Academic Track' ? 'Academic Progress' : 'Overall Progress'}
+            </h3>
             <p className="mb-2 text-sm text-gray-600">Module Completion</p>
             <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200">
               <div
