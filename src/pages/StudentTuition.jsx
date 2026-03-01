@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { FiPrinter } from 'react-icons/fi'
 import TransactionReceipt from '../components/TransactionReceipt'
 import { initialTuitionPaymentHistory, tuitionStudentTrack } from '../data/portal/tuitionData'
@@ -8,26 +8,108 @@ const feeCategories = [
   { id: 'other', label: 'Other Fees (Lab, ID, etc.)', baseAmountNGN: 25000, amountPaidNGN: 0 }
 ]
 
+const TUITION_STORAGE_KEY = 'debutron-student-tuition-state'
+const TUITION_HISTORY_STORAGE_KEY = 'debutron-student-tuition-history'
+
 export default function StudentTuition() {
   const studentTrack = tuitionStudentTrack
-  const [activeFeeTab, setActiveFeeTab] = useState(feeCategories[0].id)
+  const [activeFeeTab, setActiveFeeTab] = useState(() => {
+    try {
+      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
+      if (!raw) return feeCategories[0].id
+      const parsed = JSON.parse(raw)
+      const exists = feeCategories.some((fee) => fee.id === parsed.activeFeeTab)
+      return exists ? parsed.activeFeeTab : feeCategories[0].id
+    } catch {
+      return feeCategories[0].id
+    }
+  })
   const currentFeeData = feeCategories.find((fee) => fee.id === activeFeeTab) || feeCategories[0]
   const balanceDue = currentFeeData.baseAmountNGN - currentFeeData.amountPaidNGN
 
-  const [paymentHistory, setPaymentHistory] = useState(initialTuitionPaymentHistory)
+  const [paymentHistory, setPaymentHistory] = useState(() => {
+    try {
+      const raw = localStorage.getItem(TUITION_HISTORY_STORAGE_KEY)
+      if (!raw) return initialTuitionPaymentHistory
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed : initialTuitionPaymentHistory
+    } catch {
+      return initialTuitionPaymentHistory
+    }
+  })
 
-  const [paymentAmount, setPaymentAmount] = useState(balanceDue)
-  const [promoCode, setPromoCode] = useState('')
-  const [discount, setDiscount] = useState(0)
+  const [paymentAmount, setPaymentAmount] = useState(() => {
+    try {
+      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
+      if (!raw) return feeCategories[0].baseAmountNGN - feeCategories[0].amountPaidNGN
+      const parsed = JSON.parse(raw)
+      return Number.isFinite(parsed.paymentAmount)
+        ? parsed.paymentAmount
+        : feeCategories[0].baseAmountNGN - feeCategories[0].amountPaidNGN
+    } catch {
+      return feeCategories[0].baseAmountNGN - feeCategories[0].amountPaidNGN
+    }
+  })
+  const [promoCode, setPromoCode] = useState(() => {
+    try {
+      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
+      if (!raw) return ''
+      const parsed = JSON.parse(raw)
+      return typeof parsed.promoCode === 'string' ? parsed.promoCode : ''
+    } catch {
+      return ''
+    }
+  })
+  const [discount, setDiscount] = useState(() => {
+    try {
+      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
+      if (!raw) return 0
+      const parsed = JSON.parse(raw)
+      return Number.isFinite(parsed.discount) ? parsed.discount : 0
+    } catch {
+      return 0
+    }
+  })
   const [promoMessage, setPromoMessage] = useState('')
   const [selectedReceipt, setSelectedReceipt] = useState(null)
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false)
+  const hasInitialized = useRef(false)
 
   useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true
+      return
+    }
+
     setPaymentAmount(balanceDue)
     setDiscount(0)
+    setPromoCode('')
     setPromoMessage('')
   }, [activeFeeTab, balanceDue])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        TUITION_STORAGE_KEY,
+        JSON.stringify({
+          activeFeeTab,
+          paymentAmount,
+          promoCode,
+          discount
+        })
+      )
+    } catch {
+      // ignore storage write failures
+    }
+  }, [activeFeeTab, paymentAmount, promoCode, discount])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TUITION_HISTORY_STORAGE_KEY, JSON.stringify(paymentHistory))
+    } catch {
+      // ignore storage write failures
+    }
+  }, [paymentHistory])
 
   useEffect(() => {
     if (!selectedReceipt || !shouldAutoPrint) return
