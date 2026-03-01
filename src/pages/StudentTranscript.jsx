@@ -1,5 +1,7 @@
 import React from 'react'
 import { FiPrinter } from 'react-icons/fi'
+import { portalStudentIdentity } from '../data/portal/notificationsData'
+import { tuitionStudentTrack } from '../data/portal/tuitionData'
 
 const techTrackData = [
   {
@@ -33,8 +35,10 @@ function getGradeClass(grade) {
 }
 
 export default function StudentTranscript() {
-  const studentTrack = 'Academic Track'
-  const activeData = studentTrack === 'Academic Track' ? academicTrackData : techTrackData
+  const studentTrack = tuitionStudentTrack
+  const studentData = portalStudentIdentity
+  const isAcademicTrack = studentTrack.toLowerCase().includes('academic')
+  const activeData = isAcademicTrack ? academicTrackData : techTrackData
 
   const average =
     activeData.reduce((sum, item) => sum + (Number.parseFloat(item.score) || 0), 0) /
@@ -53,6 +57,20 @@ export default function StudentTranscript() {
             <FiPrinter />
             Print Official Record
           </button>
+        </div>
+
+        <div className="mb-6 rounded-sm border border-slate-200 bg-white p-4">
+          <div className="grid grid-cols-1 gap-3 text-sm text-slate-700 md:grid-cols-3">
+            <p>
+              <span className="font-bold text-slate-900">Student Name:</span> {studentData.name}
+            </p>
+            <p>
+              <span className="font-bold text-slate-900">Student ID:</span> {studentData.id}
+            </p>
+            <p>
+              <span className="font-bold text-slate-900">Track:</span> {studentTrack}
+            </p>
+          </div>
         </div>
 
         <div className="bg-debutron-navy text-white p-6 rounded-sm flex justify-between items-center mb-8 shadow-md">
@@ -76,7 +94,7 @@ export default function StudentTranscript() {
 
       <section>
         <h3 className="font-serif text-xl mb-4">
-          {studentTrack === 'Academic Track' ? 'Subject Breakdown' : 'Module Breakdown'}
+          {isAcademicTrack ? 'Subject Breakdown' : 'Module Breakdown'}
         </h3>
 
         <div className="bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden">
@@ -85,7 +103,7 @@ export default function StudentTranscript() {
               <tr>
                 <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">Course Code</th>
                 <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">
-                  {studentTrack === 'Academic Track' ? 'Assessment Title' : 'Module Name'}
+                  {isAcademicTrack ? 'Assessment Title' : 'Module Name'}
                 </th>
                 <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">Score (%)</th>
                 <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">Grade</th>

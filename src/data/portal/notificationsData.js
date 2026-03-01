@@ -43,6 +43,6 @@ export const settingsNotificationHistory = [
 ]
 
 export const portalStudentIdentity = {
-  name: 'Muyiwa',
+  name: 'Muyiwa Obadara',
   id: '000001',
 }
