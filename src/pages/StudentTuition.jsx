@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { FiGlobe, FiMapPin, FiPrinter } from 'react-icons/fi'
+import { FiPrinter } from 'react-icons/fi'
 import TransactionReceipt from '../components/TransactionReceipt'
-import { initialTuitionPaymentHistory, tuitionBaseFees, tuitionStudentTrack } from '../data/portal/tuitionData'
+import { initialTuitionPaymentHistory, tuitionStudentTrack } from '../data/portal/tuitionData'
+
+const feeCategories = [
+  { id: 'tuition', label: 'Tuition Fees', baseAmountNGN: 500000, amountPaidNGN: 150000 },
+  { id: 'other', label: 'Other Fees (Lab, ID, etc.)', baseAmountNGN: 25000, amountPaidNGN: 0 }
+]
 
 export default function StudentTuition() {
-  const [currency, setCurrency] = useState('NGN')
   const studentTrack = tuitionStudentTrack
-
-  const totalTuition = currency === 'NGN' ? tuitionBaseFees.NGN : tuitionBaseFees.USD
-  const amountPaid = currency === 'NGN' ? 150000 : 150
-  const balanceDue = totalTuition - amountPaid
+  const [activeFeeTab, setActiveFeeTab] = useState(feeCategories[0].id)
+  const currentFeeData = feeCategories.find((fee) => fee.id === activeFeeTab) || feeCategories[0]
+  const balanceDue = currentFeeData.baseAmountNGN - currentFeeData.amountPaidNGN
 
   const [paymentHistory, setPaymentHistory] = useState(initialTuitionPaymentHistory)
 
@@ -24,7 +27,7 @@ export default function StudentTuition() {
     setPaymentAmount(balanceDue)
     setDiscount(0)
     setPromoMessage('')
-  }, [currency, balanceDue])
+  }, [activeFeeTab, balanceDue])
 
   useEffect(() => {
     if (!selectedReceipt || !shouldAutoPrint) return
@@ -38,13 +41,13 @@ export default function StudentTuition() {
 
   const finalPayment = Math.max(0, Number(paymentAmount) - Number(discount))
 
-  const generateTxnDescription = (amountBeingPaid, previousBalance, totalFee, trackName) => {
+  const generateTxnDescription = (amountBeingPaid, previousBalance, totalFee, trackName, feeLabel) => {
     if (amountBeingPaid === totalFee) {
-      return `Full Tuition Settlement - ${trackName}`
+      return `Full Payment for ${feeLabel} - ${trackName}`
     } else if (amountBeingPaid === previousBalance) {
-      return `Final Tuition Balance Clearance - ${trackName}`
+      return `Final Balance Clearance for ${feeLabel} - ${trackName}`
     } else {
-      return `Tuition Installment Payment - ${trackName}`
+      return `Payment for ${feeLabel} - ${trackName}`
     }
   }
 
@@ -58,15 +61,20 @@ export default function StudentTuition() {
     // Mock promo: apply 10% discount of the current payment amount
     const newDiscount = Math.round(Number(paymentAmount) * 0.1)
     setDiscount(newDiscount)
-    const currencySymbol = currency === 'NGN' ? '₦' : '$'
-    setPromoMessage(`Voucher applied — ${currencySymbol}${newDiscount.toLocaleString()} discount`)
+    setPromoMessage(`Voucher applied — ₦${newDiscount.toLocaleString()} discount`)
   }
 
   function handleMockPayment(e) {
     e.preventDefault()
 
     const currentTrack = studentTrack === 'Academic Track' ? 'Academic Track' : 'Tech Innovation Track'
-    const autoDescription = generateTxnDescription(paymentAmount, balanceDue, totalTuition, currentTrack)
+    const autoDescription = generateTxnDescription(
+      paymentAmount,
+      balanceDue,
+      currentFeeData.baseAmountNGN,
+      currentTrack,
+      currentFeeData.label
+    )
 
     const newTxn = {
       id: `TXN-${Math.floor(Math.random() * 1000000)}`,
@@ -74,9 +82,9 @@ export default function StudentTuition() {
       studentName: 'Muyiwa',
       studentId: '000001',
       description: autoDescription,
-      currency: currency,
+      currency: 'NGN',
       amountPaid: paymentAmount,
-      balance: balanceDue - paymentAmount,
+      balance: Math.max(0, balanceDue - paymentAmount),
       method: 'Flutterwave',
       status: 'Successful'
     }
@@ -142,44 +150,44 @@ export default function StudentTuition() {
           <h1 className="font-serif text-3xl text-debutron-navy">Tuition &amp; Financial Aid</h1>
         </header>
 
+        <div className="border-b border-gray-200 mb-8 flex gap-8">
+          {feeCategories.map((fee) => (
+            <button
+              key={fee.id}
+              type="button"
+              onClick={() => setActiveFeeTab(fee.id)}
+              className={
+                activeFeeTab === fee.id
+                  ? 'border-b-2 border-debutron-navy text-debutron-navy font-bold pb-2'
+                  : 'text-gray-500 hover:text-slate-800 pb-2'
+              }
+            >
+              {fee.label}
+            </button>
+          ))}
+        </div>
+
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 border border-gray-200 shadow-sm">
-            <div className="text-sm text-gray-500">Total Program Fee</div>
-            <div className="mt-2 text-2xl font-bold">{currency === 'NGN' ? '₦' : '$'}{totalTuition.toLocaleString()}</div>
+            <div className="text-sm text-gray-500">Total Fee ({currentFeeData.label})</div>
+            <div className="mt-2 text-2xl font-bold">₦{currentFeeData.baseAmountNGN.toLocaleString()}</div>
           </div>
 
           <div className="bg-white p-6 border border-gray-200 shadow-sm">
             <div className="text-sm text-gray-500">Amount Paid</div>
-            <div className="mt-2 text-2xl font-bold">{currency === 'NGN' ? '₦' : '$'}{amountPaid.toLocaleString()}</div>
+            <div className="mt-2 text-2xl font-bold">₦{currentFeeData.amountPaidNGN.toLocaleString()}</div>
           </div>
 
           <div className="bg-white p-6 border border-gray-200 shadow-sm">
             <div className="text-sm text-gray-500">Current Balance</div>
-            <div className="mt-2 text-2xl font-bold text-amber-600">{currency === 'NGN' ? '₦' : '$'}{balanceDue.toLocaleString()}</div>
+            <div className="mt-2 text-2xl font-bold text-amber-600">₦{balanceDue.toLocaleString()}</div>
           </div>
         </section>
 
         <div className="bg-white p-8 border-t-4 border-debutron-navy shadow-sm max-w-2xl mt-8">
           <h2 className="font-sans text-lg font-medium mb-4">Proceed with a Payment</h2>
 
-          <div className="flex items-center gap-3 mb-4">
-            <button
-              type="button"
-              onClick={() => setCurrency('NGN')}
-              className={`px-4 py-2 rounded-sm border flex items-center gap-2 font-semibold ${currency === 'NGN' ? 'bg-debutron-navy text-white border-debutron-navy' : 'bg-white text-slate-700 border-gray-300 hover:bg-slate-50'}`}
-            >
-              <FiMapPin className="h-4 w-4" /> NGN (₦)
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrency('USD')}
-              className={`px-4 py-2 rounded-sm border flex items-center gap-2 font-semibold ${currency === 'USD' ? 'bg-debutron-navy text-white border-debutron-navy' : 'bg-white text-slate-700 border-gray-300 hover:bg-slate-50'}`}
-            >
-              <FiGlobe className="h-4 w-4" /> USD ($)
-            </button>
-          </div>
-
-          <label className="block text-sm text-gray-600 mb-2">Amount to Pay ({currency === 'NGN' ? '₦' : '$'})</label>
+          <label className="block text-sm text-gray-600 mb-2">Amount to Pay (₦)</label>
           <input
             type="number"
             value={paymentAmount}
@@ -210,19 +218,19 @@ export default function StudentTuition() {
           <div className="mt-6 border-t pt-4">
             <div className="flex items-center justify-between mb-4">
               <div className="text-sm text-gray-600">Discount</div>
-              <div className="text-sm font-medium">{currency === 'NGN' ? '₦' : '$'}{discount.toLocaleString()}</div>
+              <div className="text-sm font-medium">₦{discount.toLocaleString()}</div>
             </div>
 
             <div className="flex items-center justify-between mb-6">
               <div className="text-lg font-semibold">Total to Pay</div>
-              <div className="text-xl font-bold">{currency === 'NGN' ? '₦' : '$'}{finalPayment.toLocaleString()}</div>
+              <div className="text-xl font-bold">₦{finalPayment.toLocaleString()}</div>
             </div>
 
             <button
               onClick={handleMockPayment}
               className="px-8 py-3 w-full rounded-sm bg-debutron-navy text-white hover:bg-slate-800"
             >
-              Proceed to Secure Payment (Flutterwave)
+              Pay {currentFeeData.label} via Secure Gateway
             </button>
           </div>
         </div>

@@ -54,7 +54,7 @@ import StudentLibrary from './pages/StudentLibrary'
 import StudentSettings from './pages/StudentSettings'
 import ConsultationBooking from './components/ConsultationBooking'
 import ApplicationForm from './components/ApplicationForm'
-import NotFoundPage from './pages/NotFoundPage'
+import NotFound from './pages/NotFoundPage'
 // (imports above already include StudentTuition and StudentProfile)
 
 const MainLayout = () => (
@@ -174,7 +174,7 @@ function App() {
 				</Route>
 
 				{/* GLOBAL 404 (catch-all) */}
-				<Route path="*" element={<NotFoundPage />} />
+				<Route path="*" element={<NotFound />} />
 			</Routes>
 		</Router>
 	)

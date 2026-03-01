@@ -35,7 +35,7 @@ export default function PortalSidebar({ open = false, onClose = () => {} }) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="w-64 bg-debutron-navy text-white min-h-screen flex flex-col hidden md:flex">
+      <aside className="print:hidden w-64 bg-debutron-navy text-white min-h-screen flex flex-col hidden md:flex">
         <nav className="flex-1 px-4 py-8 space-y-2" aria-label="Portal navigation">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} className={({ isActive }) => `${base} ${isActive ? active : ''}`}>
@@ -58,7 +58,7 @@ export default function PortalSidebar({ open = false, onClose = () => {} }) {
 
       {/* Mobile sidebar overlay */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-debutron-navy text-white flex flex-col md:hidden transform transition-transform ${
+        className={`print:hidden fixed inset-y-0 left-0 z-50 w-64 bg-debutron-navy text-white flex flex-col md:hidden transform transition-transform ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -101,7 +101,7 @@ export default function PortalSidebar({ open = false, onClose = () => {} }) {
       </aside>
 
       {/* Backdrop for mobile when open */}
-      {open && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={onClose} />}
+      {open && <div className="print:hidden fixed inset-0 z-40 bg-black/40 md:hidden" onClick={onClose} />}
     </>
   )
 }
