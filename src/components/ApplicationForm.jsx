@@ -87,9 +87,10 @@ function ApplicationForm() {
 	const [referenceNumber, setReferenceNumber] = useState('')
 	const [submissionPaymentStatus, setSubmissionPaymentStatus] = useState('')
 
-	const baseFeeNGN = 10000
-	const baseFeeUSD = 10
-	const baseFee = currency === 'NGN' ? baseFeeNGN : baseFeeUSD
+	const isReturningStudent = Boolean(localStorage.getItem('studentToken'))
+	const applicationFeeNGN = isReturningStudent ? 5000 : 25000
+	const applicationFeeUSD = isReturningStudent ? 5 : 25
+	const baseFee = currency === 'NGN' ? applicationFeeNGN : applicationFeeUSD
 	const finalAmount = Math.max(0, baseFee - discountAmount)
 
 	const countries = useMemo(
@@ -181,7 +182,7 @@ function ApplicationForm() {
 		setPaymentSuccess(false)
 
 		if (promoCode.trim() === 'SCHOLAR100') {
-			setDiscountAmount(newCurrency === 'NGN' ? baseFeeNGN : baseFeeUSD)
+			setDiscountAmount(newCurrency === 'NGN' ? applicationFeeNGN : applicationFeeUSD)
 		}
 	}
 
@@ -943,6 +944,11 @@ function ApplicationForm() {
 								</div>
 
 								<p className="font-sans text-sm text-gray-700">Application Ref: <span className="font-bold text-debutron-navy">{referenceNumber}</span></p>
+								{isReturningStudent && (
+									<span className="mt-3 inline-block rounded-sm bg-green-100 px-3 py-1 font-sans text-xs font-bold uppercase tracking-wide text-green-700">
+										Alumni Discount Applied
+									</span>
+								)}
 								<p className="mt-4 font-sans text-3xl font-bold text-gray-900">Processing Fee: {currency === 'NGN' ? '₦' : '$'}{finalAmount}</p>
 
 								{finalAmount === 0 && (
