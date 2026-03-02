@@ -53,7 +53,9 @@ import StudentCalendar from './pages/StudentCalendar'
 import StudentLibrary from './pages/StudentLibrary'
 import StudentSettings from './pages/StudentSettings'
 import ConsultationBooking from './components/ConsultationBooking'
+import ApplicationEntry from './components/ApplicationEntry'
 import ApplicationForm from './components/ApplicationForm'
+import TechTransitionForm from './components/TechTransitionForm'
 import NotFound from './pages/NotFoundPage'
 // (imports above already include StudentTuition and StudentProfile)
 
@@ -131,7 +133,9 @@ function App() {
 					<Route path="/pearson-vue" element={<PearsonVue />} />
 					<Route path="/educational-consulting" element={<EduConsulting />} />
 					<Route path="/educational-consulting/book-consultation" element={<ConsultationBooking />} />
-					<Route path="/apply" element={<ApplicationForm />} />
+					<Route path="/apply" element={<ApplicationEntry />} />
+					<Route path="/apply/step-1" element={<ApplicationForm />} />
+					<Route path="/apply/returning" element={<ApplicationForm />} />
 					<Route path="/application" element={<ApplicationForm />} />
 					<Route path="/exam-registration" element={<ExamRegistration />} />
 					<Route path="/contact" element={<Contact />} />
@@ -171,6 +175,8 @@ function App() {
 					<Route path="/student/calendar" element={<StudentCalendar />} />
 					<Route path="/student/elibrary" element={<StudentLibrary />} />
 					<Route path="/student/settings" element={<StudentSettings />} />
+					<Route path="/student/transition-tech" element={<TechTransitionForm />} />
+					<Route path="/dashboard/transition-tech" element={<TechTransitionForm />} />
 				</Route>
 
 				{/* GLOBAL 404 (catch-all) */}

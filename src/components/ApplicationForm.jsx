@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { FiCheckCircle, FiInfo } from 'react-icons/fi'
 import { Country, State } from 'country-state-city'
 import PhoneInput from 'react-phone-input-2'
@@ -72,7 +73,9 @@ const getFlagEmoji = (isoCode) => {
 }
 
 function ApplicationForm() {
-	const [step, setStep] = useState(1)
+	const { pathname } = useLocation()
+	const isReturningFlow = pathname === '/apply/returning'
+	const [step, setStep] = useState(() => (isReturningFlow ? 2 : 1))
 	const [formData, setFormData] = useState(initialFormData)
 	const [isSubmitted, setIsSubmitted] = useState(false)
 	const [errors, setErrors] = useState({})
@@ -86,6 +89,7 @@ function ApplicationForm() {
 	const [sameAsAbove, setSameAsAbove] = useState(false)
 	const [referenceNumber, setReferenceNumber] = useState('')
 	const [submissionPaymentStatus, setSubmissionPaymentStatus] = useState('')
+	const trackingId = referenceNumber
 
 	const isReturningStudent = Boolean(localStorage.getItem('studentToken'))
 	const applicationFeeNGN = isReturningStudent ? 5000 : 25000
@@ -118,6 +122,10 @@ function ApplicationForm() {
 		const letters = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('')
 		return `${digits}${letters}`
 	}
+
+	useEffect(() => {
+		setStep(isReturningFlow ? 2 : 1)
+	}, [isReturningFlow])
 
 	useEffect(() => {
 		setReferenceNumber(generateReference())
@@ -338,7 +346,7 @@ function ApplicationForm() {
 		setPaymentSuccess(false)
 		setPromoError('')
 		setSameAsAbove(false)
-		setStep(1)
+		setStep(isReturningFlow ? 2 : 1)
 		setReferenceNumber(generateReference())
 	}
 
@@ -476,6 +484,20 @@ function ApplicationForm() {
 							</span>
 						))}
 					</div>
+
+					{trackingId && (
+						<div className="bg-blue-50 border-l-4 border-blue-700 p-4 mb-8">
+							<div className="flex justify-between items-center">
+								<p className="text-slate-700 text-sm md:text-base">Application Draft Saved. Your Tracking ID is:</p>
+								<span className="font-mono text-lg md:text-xl font-black text-blue-900 bg-white px-3 py-1 border border-blue-200">
+									{trackingId}
+								</span>
+							</div>
+							<span className="text-xs text-slate-500 mt-1 block">
+								Please copy this ID. You can use it to resume your application at any time.
+							</span>
+						</div>
+					)}
 
 					<form onSubmit={handleSubmit} className="rounded-sm border border-gray-200 bg-white p-6 shadow-sm md:p-10">
 				{step === 1 && (

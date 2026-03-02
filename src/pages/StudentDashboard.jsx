@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 function StudentDashboard() {
   const studentTrack = 'Tech Innovation Track'
@@ -60,6 +61,26 @@ function StudentDashboard() {
             <p className="mt-2 text-sm font-medium text-amber-700">Happening in 3 days</p>
           </article>
         </section>
+
+    <section>
+      <div className="bg-slate-900 text-white p-6 rounded-sm mt-8 relative overflow-hidden">
+        <span className="absolute right-4 top-4 bg-yellow-400 text-slate-900 text-xs font-bold px-2 py-1 uppercase tracking-wider">
+          Alumni Benefit
+        </span>
+
+        <h3 className="text-xl font-serif font-bold mb-2">Ready for Tech Transition?</h3>
+        <p className="text-slate-300 text-sm mb-6">
+          Move into the Tech Innovation Track with your saved student profile and an exclusive alumni fee of ₦5,000.
+        </p>
+
+        <Link
+          to="/student/transition-tech"
+          className="bg-white text-slate-900 px-4 py-2 font-bold w-full md:w-auto inline-block text-center hover:bg-slate-100"
+        >
+          Start Tech Transition
+        </Link>
+      </div>
+    </section>
 
         {studentTrack === 'Tech Innovation Track' && (
           <section>
