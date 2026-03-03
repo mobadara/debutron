@@ -132,7 +132,7 @@ function Header() {
 							placeholder="Search..."
 							value={searchQuery}
 							onChange={(event) => setSearchQuery(event.target.value)}
-							className="pl-10 pr-4 py-2 rounded-full border border-transparent bg-transparent w-10 focus:w-44 focus:bg-gray-100 focus:border-gray-300 focus:outline-none transition-all duration-300 ease-in-out cursor-pointer focus:cursor-text font-sans text-sm"
+							className="pl-10 pr-4 py-2 rounded-full border border-transparent bg-transparent w-10 focus:w-44 focus:bg-gray-100 focus:border-gray-300 focus:outline-none transition-all duration-300 ease-in-out cursor-pointer focus:cursor-text font-sans text-sm dark:focus:bg-slate-800 dark:focus:border-slate-600 dark:text-slate-200"
 						/>
 					</div>
 					<button
@@ -214,19 +214,19 @@ function Header() {
 						placeholder="Search..."
 						value={searchQuery}
 						onChange={(event) => setSearchQuery(event.target.value)}
-						className="pl-10 pr-4 py-2 rounded-full border border-transparent bg-transparent w-12 focus:w-48 sm:focus:w-64 focus:bg-gray-100 focus:border-gray-300 focus:outline-none transition-all duration-300 ease-in-out cursor-pointer focus:cursor-text font-sans text-sm"
+						className="pl-10 pr-4 py-2 rounded-full border border-transparent bg-transparent w-12 focus:w-48 sm:focus:w-64 focus:bg-gray-100 focus:border-gray-300 focus:outline-none transition-all duration-300 ease-in-out cursor-pointer focus:cursor-text font-sans text-sm dark:focus:bg-slate-800 dark:focus:border-slate-600 dark:text-slate-200"
 					/>
 				</div>
 			</div>
 
 			<div
 				ref={mobileMenuRef}
-				className={`border-t border-gray-100 bg-white px-4 py-2 md:hidden origin-top transform overflow-hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-[80vh] translate-y-0 scale-y-100 opacity-100' : 'max-h-0 -translate-y-2 scale-y-95 opacity-0 pointer-events-none'}`}
+				className={`border-t border-gray-100 bg-white px-4 py-2 md:hidden origin-top transform overflow-hidden transition-all duration-300 ease-in-out dark:border-slate-700 dark:bg-slate-900 ${isMobileMenuOpen ? 'max-h-[80vh] translate-y-0 scale-y-100 opacity-100' : 'max-h-0 -translate-y-2 scale-y-95 opacity-0 pointer-events-none'}`}
 				aria-label="Mobile navigation"
 				aria-hidden={!isMobileMenuOpen}
 				onClickCapture={handleMobileNavClickCapture}
 			>
-					<Link className="block w-full py-3 border-b border-gray-100 font-serif text-debutron-navy" to="/" onClick={closeMenu}>
+					<Link className="block w-full py-3 border-b border-gray-100 font-serif text-debutron-navy dark:border-slate-700 dark:text-slate-200" to="/" onClick={closeMenu}>
 						Home
 					</Link>
 
@@ -234,13 +234,13 @@ function Header() {
 						<button
 							type="button"
 							onClick={() => toggleDropdown('about')}
-							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy"
+							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy dark:border-slate-700 dark:text-slate-200"
 						>
 							<span>About Us</span>
 							{activeDropdown === 'about' ? <FiChevronDown /> : <FiChevronRight />}
 						</button>
 						{activeDropdown === 'about' && (
-							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal">
+							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal dark:bg-slate-800 dark:text-slate-200">
 								{aboutMenuLinks.map((item) => (
 									<Link key={item.to} to={item.to} onClick={closeMenu}>
 										{item.label}
@@ -254,13 +254,13 @@ function Header() {
 						<button
 							type="button"
 							onClick={() => toggleDropdown('innovations')}
-							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy"
+							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy dark:border-slate-700 dark:text-slate-200"
 						>
 							<span>Innovations</span>
 							{activeDropdown === 'innovations' ? <FiChevronDown /> : <FiChevronRight />}
 						</button>
 						{activeDropdown === 'innovations' && (
-							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal">
+							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal dark:bg-slate-800 dark:text-slate-200">
 								{innovationsMenuLinks.map((item) => (
 									<Link key={item.to} to={item.to} onClick={closeMenu}>
 										{item.label}
@@ -274,13 +274,13 @@ function Header() {
 						<button
 							type="button"
 							onClick={() => toggleDropdown('programs')}
-							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy"
+							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy dark:border-slate-700 dark:text-slate-200"
 						>
 							<span>Programs</span>
 							{activeDropdown === 'programs' ? <FiChevronDown /> : <FiChevronRight />}
 						</button>
 						{activeDropdown === 'programs' && (
-							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal">
+							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal dark:bg-slate-800 dark:text-slate-200">
 								{[...programsAcademicLinks, ...programsTechLinks].map((item) => (
 									<Link key={item.to} to={item.to} onClick={closeMenu}>
 										{item.label}
@@ -294,13 +294,13 @@ function Header() {
 						<button
 							type="button"
 							onClick={() => toggleDropdown('assessment')}
-							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy"
+							className="flex justify-between items-center w-full py-3 border-b border-gray-100 font-serif text-debutron-navy dark:border-slate-700 dark:text-slate-200"
 						>
 							<span>Assessment &amp; Advisory</span>
 							{activeDropdown === 'assessment' ? <FiChevronDown /> : <FiChevronRight />}
 						</button>
 						{activeDropdown === 'assessment' && (
-							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal">
+							<div className="flex flex-col pl-6 space-y-3 py-2 bg-gray-50 font-sans text-debutron-charcoal dark:bg-slate-800 dark:text-slate-200">
 								{assessmentMenuLinks.map((item) => (
 									<Link key={item.to} to={item.to} onClick={closeMenu}>
 										{renderLinkLabel(item)}
@@ -310,7 +310,7 @@ function Header() {
 						)}
 					</div>
 
-					<Link className="block w-full py-3 font-serif text-debutron-navy" to="/contact" onClick={closeMenu}>
+					<Link className="block w-full py-3 font-serif text-debutron-navy dark:text-slate-200" to="/contact" onClick={closeMenu}>
 						Contact
 					</Link>
 			</div>

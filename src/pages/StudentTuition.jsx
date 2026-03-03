@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { FiCreditCard, FiCheckCircle, FiClock, FiDownloadCloud, FiPrinter, FiX } from 'react-icons/fi'
 import TransactionReceipt from '../components/TransactionReceipt'
@@ -31,6 +31,7 @@ function StudentTuition() {
 	const [paymentAmount, setPaymentAmount] = useState('')
 	const [selectedReceipt, setSelectedReceipt] = useState(null)
 	const [shouldAutoPrint, setShouldAutoPrint] = useState(false)
+	const lastAutoPrintedReceiptRef = useRef(null)
 
 	const profile = billingProfiles[activeProgram] || billingProfiles.utme
 	const activeFinancials = profile[currency]
@@ -78,6 +79,9 @@ function StudentTuition() {
 
 	useEffect(() => {
 		if (!selectedReceipt || !shouldAutoPrint) return
+		if (lastAutoPrintedReceiptRef.current === selectedReceipt.id) return
+
+		lastAutoPrintedReceiptRef.current = selectedReceipt.id
 
 		const timeoutId = window.setTimeout(() => {
 			window.print()
@@ -88,7 +92,8 @@ function StudentTuition() {
 	}, [selectedReceipt, shouldAutoPrint])
 
 	return (
-		<div className="max-w-6xl mx-auto p-8">
+		<>
+		<div className="max-w-6xl mx-auto p-8 print:hidden">
 			<header className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 				<div>
 					<h1 className="text-3xl font-serif font-bold text-slate-900">Financial Overview</h1>
@@ -289,8 +294,10 @@ function StudentTuition() {
 				</div>
 			)}
 
+		</div>
+
 			{selectedReceipt && (
-				<div className="fixed inset-0 bg-black/60 z-50 p-4 overflow-y-auto">
+				<div className="fixed inset-0 bg-black/60 z-50 p-4 overflow-y-auto print:static print:bg-white print:p-0 print:overflow-visible">
 					<div className="max-w-4xl mx-auto">
 						<div className="mb-4 flex justify-end gap-2 print:hidden">
 							<button
@@ -315,7 +322,7 @@ function StudentTuition() {
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	)
 }
 

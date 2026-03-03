@@ -3,7 +3,7 @@ import { FiShield, FiBell, FiSettings, FiCheckCircle } from 'react-icons/fi'
 import { defaultNotificationPreferences, settingsNotificationHistory } from '../data/portal/notificationsData'
 
 const FieldLabel = ({ text }) => (
-  <label className="block text-sm font-semibold text-gray-700 mb-2">{text}</label>
+  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">{text}</label>
 )
 
 export default function StudentSettings() {
@@ -46,9 +46,9 @@ export default function StudentSettings() {
   }, [notificationPreferences, preferenceStorageKey])
 
   return (
-    <section className="max-w-6xl mx-auto p-8">
+    <section className="max-w-6xl mx-auto p-8 dark:bg-slate-900">
       <header>
-        <h1 className="font-serif text-3xl text-debutron-navy mb-6">Account Settings</h1>
+        <h1 className="font-serif text-3xl text-debutron-navy dark:text-slate-200 mb-6">Account Settings</h1>
       </header>
 
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
@@ -57,7 +57,7 @@ export default function StudentSettings() {
             <button
               type="button"
               onClick={() => setActiveTab('security')}
-              className={`w-full text-left flex items-center gap-2 px-4 py-3 rounded-sm font-semibold text-sm border ${activeTab === 'security' ? 'bg-debutron-navy text-white border-debutron-navy' : 'bg-white text-slate-600 border-gray-200 hover:bg-slate-50'}`}
+              className={`w-full text-left flex items-center gap-2 px-4 py-3 rounded-sm font-semibold text-sm border ${activeTab === 'security' ? 'bg-debutron-navy text-white border-debutron-navy' : 'bg-white text-slate-600 border-gray-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800'}`}
             >
               <FiShield className="h-4 w-4" />
               Security &amp; Password
@@ -65,7 +65,7 @@ export default function StudentSettings() {
             <button
               type="button"
               onClick={() => setActiveTab('notifications')}
-              className={`w-full text-left flex items-center gap-2 px-4 py-3 rounded-sm font-semibold text-sm border ${activeTab === 'notifications' ? 'bg-debutron-navy text-white border-debutron-navy' : 'bg-white text-slate-600 border-gray-200 hover:bg-slate-50'}`}
+              className={`w-full text-left flex items-center gap-2 px-4 py-3 rounded-sm font-semibold text-sm border ${activeTab === 'notifications' ? 'bg-debutron-navy text-white border-debutron-navy' : 'bg-white text-slate-600 border-gray-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800'}`}
             >
               <FiBell className="h-4 w-4" />
               Notifications &amp; Alerts
@@ -73,10 +73,10 @@ export default function StudentSettings() {
           </nav>
         </aside>
 
-        <div className="flex-1 bg-white p-8 border border-gray-200 shadow-sm rounded-sm">
+        <div className={`flex-1 bg-white p-8 border border-gray-200 shadow-sm rounded-sm dark:bg-slate-900 dark:border-slate-700 ${activeTab === 'security' ? 'border-b-4 border-b-debutron-navy dark:border-b-slate-500' : ''}`}>
           {activeTab === 'security' && (
             <>
-              <h2 className="font-serif text-xl mb-6 border-b border-gray-100 pb-4">
+              <h2 className="font-serif text-xl mb-6 border-b border-gray-100 pb-4 dark:text-slate-100 dark:border-slate-700">
                 <FiShield className="inline text-debutron-navy mr-2" />
                 Password &amp; Security
               </h2>
@@ -89,7 +89,7 @@ export default function StudentSettings() {
                       type="password"
                       value={currentPassword}
                       onChange={(event) => setCurrentPassword(event.target.value)}
-                      className="w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-debutron-navy"
+                      className="w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-debutron-navy dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                     />
                   </div>
 
@@ -99,9 +99,9 @@ export default function StudentSettings() {
                       type="password"
                       value={newPassword}
                       onChange={(event) => setNewPassword(event.target.value)}
-                      className="w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-debutron-navy"
+                      className="w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-debutron-navy dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                     />
-                    <p className="mt-2 text-xs text-gray-500">
+                    <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
                       Must be at least 8 characters long and contain a number and a special character.
                     </p>
                   </div>
@@ -112,7 +112,7 @@ export default function StudentSettings() {
                       type="password"
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
-                      className="w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-debutron-navy"
+                      className="w-full rounded-sm border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-debutron-navy dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                     />
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export default function StudentSettings() {
 
           {activeTab === 'notifications' && (
             <>
-              <h2 className="font-serif text-2xl text-slate-900 border-b border-gray-100 pb-4 mb-6">
+              <h2 className="font-serif text-2xl text-slate-900 border-b border-gray-100 pb-4 mb-6 dark:text-slate-100 dark:border-slate-700">
                 <FiSettings className="inline mr-2" />
                 Notification History &amp; Preferences
               </h2>
@@ -140,9 +140,9 @@ export default function StudentSettings() {
                 <button
                   type="button"
                   onClick={() => handlePreferenceChange('gradesEmail')}
-                  className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-sm hover:bg-gray-50"
+                  className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
                 >
-                  <span className="text-sm font-medium text-slate-700">Email Alerts for Grades</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Email Alerts for Grades</span>
                   <span className={`h-6 w-11 rounded-full p-0.5 transition-colors ${notificationPreferences.gradesEmail ? 'bg-debutron-navy' : 'bg-gray-300'}`}>
                     <span className={`block h-5 w-5 rounded-full bg-white transition-transform ${notificationPreferences.gradesEmail ? 'translate-x-5' : 'translate-x-0'}`} />
                   </span>
@@ -151,9 +151,9 @@ export default function StudentSettings() {
                 <button
                   type="button"
                   onClick={() => handlePreferenceChange('tuitionEmail')}
-                  className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-sm hover:bg-gray-50"
+                  className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
                 >
-                  <span className="text-sm font-medium text-slate-700">Email Alerts for Tuition Receipts</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Email Alerts for Tuition Receipts</span>
                   <span className={`h-6 w-11 rounded-full p-0.5 transition-colors ${notificationPreferences.tuitionEmail ? 'bg-debutron-navy' : 'bg-gray-300'}`}>
                     <span className={`block h-5 w-5 rounded-full bg-white transition-transform ${notificationPreferences.tuitionEmail ? 'translate-x-5' : 'translate-x-0'}`} />
                   </span>
@@ -162,26 +162,26 @@ export default function StudentSettings() {
                 <button
                   type="button"
                   onClick={() => handlePreferenceChange('urgentSms')}
-                  className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-sm hover:bg-gray-50"
+                  className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
                 >
-                  <span className="text-sm font-medium text-slate-700">SMS Alerts for Urgent Schedule Changes</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">SMS Alerts for Urgent Schedule Changes</span>
                   <span className={`h-6 w-11 rounded-full p-0.5 transition-colors ${notificationPreferences.urgentSms ? 'bg-debutron-navy' : 'bg-gray-300'}`}>
                     <span className={`block h-5 w-5 rounded-full bg-white transition-transform ${notificationPreferences.urgentSms ? 'translate-x-5' : 'translate-x-0'}`} />
                   </span>
                 </button>
               </div>
 
-              <h3 className="text-lg font-bold text-slate-800 mt-10 mb-4">Recent Activity</h3>
-              <div className="border border-gray-200 rounded-sm overflow-hidden">
+              <h3 className="text-lg font-bold text-slate-800 mt-10 mb-4 dark:text-slate-200">Recent Activity</h3>
+              <div className="border border-gray-200 rounded-sm overflow-hidden dark:border-slate-700">
                 {settingsNotificationHistory.map((item) => (
-                  <div key={item.id} className="p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+                  <div key={item.id} className="p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 dark:border-slate-700 dark:hover:bg-slate-800">
                     <div className="flex items-start gap-3">
                       <FiCheckCircle className="h-5 w-5 text-debutron-navy mt-0.5" />
                       <div>
-                        <p className="text-sm text-slate-700">
+                        <p className="text-sm text-slate-700 dark:text-slate-200">
                           <span className="font-semibold">{item.source}</span> - {item.message}
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">{item.timestamp}</p>
+                        <p className="text-xs text-slate-400 mt-1 dark:text-slate-400">{item.timestamp}</p>
                       </div>
                     </div>
                   </div>

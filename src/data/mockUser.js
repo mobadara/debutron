@@ -3,13 +3,13 @@ export const mockLoggedInUser = {
   firstName: "Muyiwa",
   
   // Enrolled Tracks: 'A' (Academic), 'T' (Tech)
-  enrolled_tracks: ['A', 'T'], 
+  enrolled_tracks: ['T'], 
   
   // Specific Programs: 'utme', 'o-level', 'data-science', 'cloud', 'cyber', 'fullstack'
   enrolled_programs: ['utme', 'data-science'], 
   
   // UI State Preferences
-  active_track: 'A', 
+  active_track: 'T', 
   active_program: 'data-science',
   
   // Progression Flags (Controls the Alumni Promo Lock)

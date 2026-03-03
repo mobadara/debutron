@@ -17,7 +17,7 @@ import {
 import DebutronLogo from '../DebutronLogo'
 
 const navItemClass = 'flex items-center gap-3 rounded-sm px-3 py-2 text-sm font-semibold transition-colors'
-const focusRingClass = 'focus:outline-none focus:ring-4 focus:ring-yellow-400 focus:bg-slate-100 dark:focus:bg-slate-800 rounded-sm transition-all'
+const focusRingClass = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:focus-visible:ring-slate-500 focus:bg-slate-100 dark:focus:bg-slate-800 rounded-sm transition-all'
 
 const academicProgramIds = ['o-level', 'utme', 'a-level']
 const techProgramIds = ['data-science', 'data-analytics', 'cloud', 'cyber', 'fullstack']
@@ -39,6 +39,8 @@ function GlobalSidebar({ activeTrack, setActiveTrack, activeProgram, setActivePr
 			: 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800'
 
 	const trackPrograms = getProgramsForTrack(activeTrack)
+	const isAcademicEnrolled = user.enrolled_tracks.includes('A')
+	const isTechEnrolled = user.enrolled_tracks.includes('T')
 
 	useEffect(() => {
 		if (!activeProgram) return
@@ -81,37 +83,45 @@ function GlobalSidebar({ activeTrack, setActiveTrack, activeProgram, setActivePr
 				>
 					<div className="flex flex-col">
 						<span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-bold">Workspace</span>
-						<span className="text-sm font-bold text-slate-900 dark:text-slate-100">{activeTrack === 'A' ? 'Academic Track' : 'Tech Track'}</span>
+						<span className="text-sm font-bold text-slate-900 dark:text-slate-100">{activeTrack === 'A' ? 'Pre-University Workspace' : 'Innovation Workspace'}</span>
 					</div>
 					<FiChevronDown className={`text-slate-500 dark:text-slate-400 transition-transform ${isTrackMenuOpen ? 'rotate-180' : ''}`} />
 				</button>
 
 				{isTrackMenuOpen && (
 					<div className="absolute left-4 right-4 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-sm shadow-md z-30 overflow-hidden">
-						{['A', 'T'].map((track) => {
-							const isEnrolled = user?.enrolled_tracks?.includes(track)
-							const trackLabel = track === 'A' ? 'Academic Track' : 'Tech Track'
+						{isAcademicEnrolled && (
+							<button
+								type="button"
+								onClick={() => {
+									const nextPrograms = getProgramsForTrack('A')
+									const rememberedProgram = lastProgramByTrackRef.current.A
+									setActiveTrack('A')
+									if (nextPrograms.length > 0) {
+										setActiveProgram(
+											rememberedProgram && nextPrograms.includes(rememberedProgram)
+												? rememberedProgram
+												: nextPrograms[0]
+										)
+									}
+									setIsTrackMenuOpen(false)
+									setIsProgramMenuOpen(false)
+									setIsOpen(false)
+								}}
+								className={`w-full px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between ${focusRingClass}`}
+							>
+								<span>Pre-University Studies</span>
+								{activeTrack === 'A' && <FiCheck className="text-green-600" />}
+							</button>
+						)}
 
-							if (!isEnrolled) {
-								return (
-									<div
-										key={track}
-										className="px-3 py-2 text-sm text-slate-400 bg-slate-50 dark:bg-slate-800 cursor-not-allowed flex items-center justify-between"
-									>
-										<span>{trackLabel}</span>
-										<FiLock />
-									</div>
-								)
-							}
-
-							return (
+						{isTechEnrolled ? (
 								<button
-									key={track}
 									type="button"
 									onClick={() => {
-										const nextPrograms = getProgramsForTrack(track)
-										const rememberedProgram = lastProgramByTrackRef.current[track]
-										setActiveTrack(track)
+										const nextPrograms = getProgramsForTrack('T')
+										const rememberedProgram = lastProgramByTrackRef.current.T
+										setActiveTrack('T')
 										if (nextPrograms.length > 0) {
 											setActiveProgram(
 												rememberedProgram && nextPrograms.includes(rememberedProgram)
@@ -125,11 +135,15 @@ function GlobalSidebar({ activeTrack, setActiveTrack, activeProgram, setActivePr
 									}}
 									className={`w-full px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between ${focusRingClass}`}
 								>
-									<span>{trackLabel}</span>
-									{activeTrack === track && <FiCheck className="text-green-600" />}
+									<span>Innovation Lab</span>
+									{activeTrack === 'T' && <FiCheck className="text-green-600" />}
 								</button>
-							)
-						})}
+							) : (
+								<div className="px-3 py-2 text-sm text-slate-400 bg-slate-50 dark:bg-slate-800 cursor-not-allowed flex items-center justify-between">
+									<span>Innovation Lab</span>
+									<FiLock />
+								</div>
+							)}
 					</div>
 				)}
 			</div>
@@ -189,7 +203,7 @@ function GlobalSidebar({ activeTrack, setActiveTrack, activeProgram, setActivePr
 
 				<div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
 					<p className="mb-2 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 font-bold">
-						{activeTrack === 'A' ? 'Academic Resources' : 'Tech Resources'}
+						{activeTrack === 'A' ? 'Pre-University Resources' : 'Innovation Resources'}
 					</p>
 
 					{activeTrack === 'A' && (

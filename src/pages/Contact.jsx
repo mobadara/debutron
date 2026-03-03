@@ -28,18 +28,18 @@ function Contact() {
 	}
 
 	return (
-		<section className="route-page bg-gray-100">
+		<section className="route-page bg-gray-100 dark:bg-slate-900">
 			<div className="mx-auto max-w-7xl px-6 py-16 md:px-12">
 				<header className="mb-10">
-					<h1 className="mb-4 font-serif text-4xl font-bold text-debutron-navy">Contact Debutron Lab</h1>
+					<h1 className="mb-4 font-serif text-4xl font-bold text-debutron-navy dark:text-slate-200">Contact Debutron Lab</h1>
 					<p className="font-sans text-lg text-debutron-charcoal">
 						Reach out to our academic advisors, technical mentors, and testing center coordinators.
 					</p>
 				</header>
 
 				<div className="grid gap-8 lg:grid-cols-2">
-					<section className="rounded-sm border border-gray-200 bg-white p-8">
-						<h2 className="mb-6 font-serif text-2xl text-debutron-navy">Official Contact Information</h2>
+					<section className="rounded-sm border border-gray-200 bg-white p-8 dark:border-slate-700 dark:bg-slate-900">
+						<h2 className="mb-6 font-serif text-2xl text-debutron-navy dark:text-slate-200">Official Contact Information</h2>
 						<div className="space-y-5 font-sans text-debutron-charcoal leading-relaxed">
 							<div className="flex items-start gap-3">
 								<MapPin className="mt-1 h-7 w-7 text-debutron-navy" aria-hidden="true" />
@@ -62,8 +62,8 @@ function Contact() {
 						</div>
 					</section>
 
-					<section className="bg-white p-8 border border-gray-200 shadow-sm rounded-sm">
-						<h2 className="mb-6 font-serif text-2xl text-debutron-navy">Institutional Inquiry Form</h2>
+					<section className="bg-white p-8 border border-gray-200 shadow-sm rounded-sm dark:border-slate-700 dark:bg-slate-900">
+						<h2 className="mb-6 font-serif text-2xl text-debutron-navy dark:text-slate-200">Institutional Inquiry Form</h2>
 						<form onSubmit={handleSubmit}>
 							<label htmlFor="fullName" className="mb-2 block font-sans text-sm text-debutron-charcoal">Full Name</label>
 							<input
@@ -132,13 +132,13 @@ function Contact() {
 					</section>
 				</div>
 
-				<section className="mt-10">
+				<section className="mt-10 overflow-hidden rounded-sm border-2 border-gray-200 bg-white p-2 shadow-md dark:border-slate-700 dark:bg-slate-950">
 					<iframe
 						title="Debutron Lab Location Map"
 						src="https://www.google.com/maps?q=A6%20Jerusalem%20Crescent%2C%20Arulogun%20Road%2C%20Ibadan%2C%20Nigeria&output=embed"
 						loading="lazy"
 						referrerPolicy="no-referrer-when-downgrade"
-						className="w-full h-64 md:h-80 lg:h-96 border-2 border-gray-200 shadow-md rounded-sm grayscale hover:grayscale-0 transition-all duration-500"
+						className="w-full h-64 md:h-80 lg:h-96 border-2 border-gray-200 rounded-sm bg-slate-900 grayscale hover:grayscale-0 transition-all duration-500 dark:border-slate-700 dark:invert dark:hue-rotate-180 dark:brightness-75 dark:contrast-125"
 					/>
 				</section>
 			</div>

@@ -31,7 +31,7 @@ function StudentDashboard() {
 					</div>
 					<div className="inline-flex items-center gap-2">
 						<FiCalendar />
-						<span>{activeTrack === 'A' ? 'Session: 2025/2026' : 'Cohort: 2026 - B'}</span>
+						<span>{activeTrack === 'A' ? 'Track: Pre-University Studies' : 'Track: Innovation Lab'}</span>
 					</div>
 					<div className="inline-flex items-center gap-2">
 						<FiTrendingUp />
@@ -43,7 +43,7 @@ function StudentDashboard() {
 			<section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 				<article className="border-t-4 border-blue-500 bg-white p-6 shadow-sm">
 					<h3 className="mb-4 font-serif text-xl font-semibold text-debutron-navy">
-						{activeTrack === 'A' ? 'Academic Progress' : 'Tech Progress'}
+						{activeTrack === 'A' ? 'Pre-University Progress' : 'Innovation Lab Progress'}
 					</h3>
 					<p className="mb-2 text-sm text-gray-600">
 						{activeTrack === 'A' ? 'Course Completion' : 'Module Completion'}
@@ -73,7 +73,7 @@ function StudentDashboard() {
 
 			{activeTrack === 'A' && (
 				<section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm mb-10">
-					<h3 className="font-serif text-xl font-bold text-slate-900 mb-1">Academic Trajectory</h3>
+					<h3 className="font-serif text-xl font-bold text-slate-900 mb-1">Pre-University Trajectory</h3>
 					<p className="text-sm text-slate-500 mb-6">Weekly Quiz Evaluation</p>
 
 					<ResponsiveContainer width="100%" height={300}>
@@ -91,7 +91,7 @@ function StudentDashboard() {
 			{activeTrack === 'T' && (
 				<section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm mb-10">
 					<h3 className="font-serif text-xl font-bold text-slate-900 mb-1">Module Project Performance</h3>
-					<p className="text-sm text-slate-500 mb-6">Evaluation across completed tech milestones.</p>
+					<p className="text-sm text-slate-500 mb-6">Evaluation across completed Innovation Lab milestones.</p>
 
 					<ResponsiveContainer width="100%" height={300}>
 						<BarChart data={projectData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -112,7 +112,7 @@ function StudentDashboard() {
 							Alumni Benefit
 						</span>
 
-						<h3 className="text-2xl font-serif font-bold mb-2">Ready for the Tech Innovation Track?</h3>
+						<h3 className="text-2xl font-serif font-bold mb-2">Ready for the Innovation Lab?</h3>
 						<p className="text-slate-300 text-sm md:text-base mb-6 max-w-2xl">
 							Now that you are advancing in your academic journey, take the next step. Alumni get a 50% discount on Tech Innovation Track enrollment (₦5,000).
 						</p>
@@ -122,7 +122,7 @@ function StudentDashboard() {
 								to="/student/transition-tech"
 								className="bg-yellow-400 text-slate-900 font-bold px-8 py-4 inline-block"
 							>
-								Start Tech Transition
+								Unlock Innovation Lab -&gt;
 							</Link>
 						) : (
 							<>

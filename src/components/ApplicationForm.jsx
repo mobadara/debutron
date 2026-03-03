@@ -525,7 +525,7 @@ function ApplicationForm() {
 						{[1, 2, 3, 4, 5, 6, 7].map((index) => (
 							<span
 								key={index}
-								className={`rounded-full px-3 py-1 ${step === index ? 'bg-debutron-navy text-white' : 'bg-gray-100 text-gray-600'}`}
+								className={`rounded-full px-3 py-1 ${step === index ? 'bg-debutron-navy text-white' : 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-200'}`}
 							>
 								Step {index}
 							</span>
@@ -533,14 +533,14 @@ function ApplicationForm() {
 					</div>
 
 					{trackingId && (
-						<div className="bg-blue-50 border-l-4 border-blue-700 p-4 mb-8">
+						<div className="bg-blue-50 border-l-4 border-blue-700 p-4 mb-8 dark:bg-slate-800 dark:border-blue-400">
 							<div className="flex justify-between items-center">
-								<p className="text-slate-700 text-sm md:text-base">Application Draft Saved. Your Tracking ID is:</p>
-								<span className="font-mono text-lg md:text-xl font-black text-blue-900 bg-white px-3 py-1 border border-blue-200">
+								<p className="text-slate-700 text-sm md:text-base dark:text-slate-200">Application Draft Saved. Your Tracking ID is:</p>
+								<span className="font-mono text-lg md:text-xl font-black text-blue-900 bg-white px-3 py-1 border border-blue-200 dark:text-blue-200 dark:bg-slate-900 dark:border-blue-800">
 									{trackingId}
 								</span>
 							</div>
-							<span className="text-xs text-slate-500 mt-1 block">
+							<span className="text-xs text-slate-500 mt-1 block dark:text-slate-400">
 								Please copy this ID. You can use it to resume your application at any time.
 							</span>
 						</div>
@@ -564,8 +564,8 @@ function ApplicationForm() {
 									onChange={updateField}
 									className="sr-only"
 								/>
-								<p className="font-serif text-xl font-bold text-debutron-navy">Academic Track</p>
-								<p className="mt-2 font-sans text-sm text-gray-600">O-Level Mastery, UTME Accelerator</p>
+								<p className="font-serif text-xl font-bold text-debutron-navy">Pre-University Studies</p>
+								<p className="mt-1 font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">(WASSCE, NECO, UTME, A-Levels)</p>
 							</label>
 
 							<label
@@ -581,8 +581,8 @@ function ApplicationForm() {
 									onChange={updateField}
 									className="sr-only"
 								/>
-								<p className="font-serif text-xl font-bold text-debutron-navy">Tech Innovation Track</p>
-								<p className="mt-2 font-sans text-sm text-gray-600">Data Science, Software Engineering, Cloud, Cyber</p>
+								<p className="font-serif text-xl font-bold text-debutron-navy">Innovation Lab</p>
+								<p className="mt-1 font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">(Data Science, Cloud, Software Engineering)</p>
 							</label>
 						</div>
 						<FieldError message={errors.programType} />
@@ -657,8 +657,10 @@ function ApplicationForm() {
 									enableSearch
 									countryCodeEditable={false}
 									placeholder="Enter your phone number"
-									inputClass="!w-full !h-[46px] !font-sans !text-sm"
-									buttonClass="!border-gray-300"
+									inputClass="!w-full !h-[46px] !font-sans !text-sm !bg-gray-50 dark:!bg-slate-800 !text-slate-900 dark:!text-slate-100 !border-gray-300 dark:!border-slate-600"
+									buttonClass="!border-gray-300 dark:!border-slate-600 !bg-gray-50 dark:!bg-slate-800"
+									dropdownClass="!bg-white dark:!bg-slate-900 !text-slate-900 dark:!text-slate-100 !border !border-gray-200 dark:!border-slate-700"
+									searchClass="!bg-white dark:!bg-slate-800 !text-slate-900 dark:!text-slate-100 !border !border-gray-300 dark:!border-slate-600"
 									containerClass="!w-full"
 								/>
 								<FieldError message={errors.phone} />

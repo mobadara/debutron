@@ -21,32 +21,32 @@ function StudentTranscript() {
 
 	return (
 		<div className="max-w-5xl mx-auto mt-6">
-			<div className="flex justify-end gap-4 mb-4">
+			<div className="flex justify-end gap-4 mb-4 print:hidden">
 				<button
 					type="button"
 					onClick={() => window.print()}
-					className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-semibold flex items-center gap-2"
+					className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-semibold flex items-center gap-2 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700"
 				>
 					<FiPrinter />
 					Print
 				</button>
 				<button
 					type="button"
-					className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-semibold flex items-center gap-2"
+					className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-semibold flex items-center gap-2 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700"
 				>
 					<FiDownload />
 					Download PDF
 				</button>
 			</div>
 
-			<div className="max-w-5xl mx-auto p-8 bg-white shadow-md border border-slate-200 mt-6">
-				<header className="border-b-4 border-slate-900 pb-6 mb-8">
+			<div className="max-w-5xl mx-auto p-8 bg-white shadow-md border border-slate-200 mt-6 dark:bg-slate-900 dark:border-slate-700 print:bg-white print:text-black print:border-black">
+				<header className="border-b-4 border-slate-900 pb-6 mb-8 dark:border-slate-400 print:border-black">
 					<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-						<h1 className="text-3xl font-serif font-black uppercase text-slate-900">Debutron Lab.</h1>
-						<p className="text-xl font-bold tracking-widest text-slate-400">OFFICIAL TRANSCRIPT</p>
+						<h1 className="text-3xl font-serif font-black uppercase text-slate-900 dark:text-slate-100 print:text-black">Debutron Lab.</h1>
+						<p className="text-xl font-bold tracking-widest text-slate-400 dark:text-slate-300 print:text-black">OFFICIAL TRANSCRIPT</p>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm text-slate-800">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm text-slate-800 dark:text-slate-200 print:text-black">
 						<div className="space-y-2">
 							<p>
 								First Name: <span className="font-bold">{user.firstName}</span>
@@ -79,7 +79,7 @@ function StudentTranscript() {
 				{activeTrack === 'T' && (
 					<table className="w-full text-left border-collapse">
 						<thead>
-							<tr className="border-b border-slate-200 text-slate-600 text-sm">
+							<tr className="border-b border-slate-200 text-slate-600 text-sm dark:border-slate-700 dark:text-slate-300 print:border-black print:text-black">
 								<th className="py-3 pr-3 font-semibold">Module Code</th>
 								<th className="py-3 pr-3 font-semibold">Module Title</th>
 								<th className="py-3 pr-3 font-semibold">Contact Hours</th>
@@ -89,7 +89,7 @@ function StudentTranscript() {
 						</thead>
 						<tbody>
 							{records.map((record) => (
-								<tr key={record.id} className="border-b border-slate-100 text-sm text-slate-800 even:bg-slate-50">
+								<tr key={record.id} className="border-b border-slate-100 text-sm text-slate-800 even:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:even:bg-slate-800 print:border-black print:text-black print:even:bg-white">
 									<td className="py-3 pr-3">{record.id}</td>
 									<td className="py-3 pr-3">{record.title}</td>
 									<td className="py-3 pr-3">{record.hours ?? '-'}</td>
@@ -104,7 +104,7 @@ function StudentTranscript() {
 				{activeTrack === 'A' && (
 					<table className="w-full text-left border-collapse">
 						<thead>
-							<tr className="border-b border-slate-200 text-slate-600 text-sm">
+							<tr className="border-b border-slate-200 text-slate-600 text-sm dark:border-slate-700 dark:text-slate-300 print:border-black print:text-black">
 								<th className="py-3 pr-3 font-semibold">Course Code</th>
 								<th className="py-3 pr-3 font-semibold">Course Title</th>
 								<th className="py-3 pr-3 font-semibold">Credit Units</th>
@@ -114,7 +114,7 @@ function StudentTranscript() {
 						</thead>
 						<tbody>
 							{records.map((record) => (
-								<tr key={record.id} className="border-b border-slate-100 text-sm text-slate-800">
+								<tr key={record.id} className="border-b border-slate-100 text-sm text-slate-800 dark:border-slate-700 dark:text-slate-100 print:border-black print:text-black">
 									<td className="py-3 pr-3">{record.id}</td>
 									<td className="py-3 pr-3">{record.title}</td>
 									<td className="py-3 pr-3">{record.credits ?? '-'}</td>
@@ -126,24 +126,24 @@ function StudentTranscript() {
 					</table>
 				)}
 
-				<div className="mt-8 p-4 bg-slate-50 border border-slate-200 flex justify-end gap-12">
+				<div className="mt-8 p-4 bg-slate-50 border border-slate-200 flex justify-end gap-12 dark:bg-slate-800 dark:border-slate-700 print:bg-white print:border-black">
 					{activeTrack === 'A' ? (
-						<p className="text-sm text-slate-700">
-							Cumulative GPA (CGPA): <span className="font-bold text-slate-900">4.50 / 5.00</span>
+						<p className="text-sm text-slate-700 dark:text-slate-200 print:text-black">
+							Cumulative GPA (CGPA): <span className="font-bold text-slate-900 dark:text-slate-100 print:text-black">4.50 / 5.00</span>
 						</p>
 					) : (
-						<p className="text-sm text-slate-700">
-							Overall Program Average: <span className="font-bold text-slate-900">90% (Distinction)</span>
+						<p className="text-sm text-slate-700 dark:text-slate-200 print:text-black">
+							Overall Program Average: <span className="font-bold text-slate-900 dark:text-slate-100 print:text-black">90% (Distinction)</span>
 						</p>
 					)}
 				</div>
 
-				<footer className="mt-16 pt-8 border-t-2 border-slate-200 flex justify-between items-end gap-6">
-					<p className="text-xs text-slate-500 max-w-xl">
+				<footer className="mt-16 pt-8 border-t-2 border-slate-200 flex justify-between items-end gap-6 dark:border-slate-700 print:border-black">
+					<p className="text-xs text-slate-500 dark:text-slate-300 max-w-xl print:text-black">
 						This document is electronically generated by the Debutron Lab Student Information System. Any alterations render it invalid.
 					</p>
 
-					<div className="border-t border-slate-900 w-48 text-center pt-2 text-sm font-bold">
+					<div className="border-t border-slate-900 dark:border-slate-400 w-48 text-center pt-2 text-sm font-bold dark:text-slate-100 print:text-black print:border-black">
 						Office of the Registrar
 					</div>
 				</footer>
