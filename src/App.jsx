@@ -1,10 +1,10 @@
-import { BrowserRouter as Router, Outlet, Route, Routes } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { useState } from 'react'
+import { FiUser } from 'react-icons/fi'
 import Navbar from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import TopUtilityBar from './components/layout/TopUtilityBar'
-import PortalHeader from './components/layout/PortalHeader'
-import PortalSidebar from './components/layout/PortalSidebar'
+import GlobalSidebar from './components/layout/GlobalSidebar'
 import PortalFooter from './components/layout/PortalFooter'
 import Home from './pages/HomePage'
 import Admissions from './pages/Admissions'
@@ -52,12 +52,16 @@ import StudentProfile from './pages/StudentProfile'
 import StudentCalendar from './pages/StudentCalendar'
 import StudentLibrary from './pages/StudentLibrary'
 import StudentSettings from './pages/StudentSettings'
+import UniversityAdmissions from './pages/UniversityAdmissions'
+import CareerGraduation from './pages/CareerGraduation'
 import ConsultationBooking from './components/ConsultationBooking'
 import ApplicationEntry from './components/ApplicationEntry'
 import ApplicationForm from './components/ApplicationForm'
 import TechTransitionForm from './components/TechTransitionForm'
 import NotFound from './pages/NotFoundPage'
 // (imports above already include StudentTuition and StudentProfile)
+
+
 
 const MainLayout = () => (
 	<div className="flex flex-col min-h-screen">
@@ -71,33 +75,31 @@ const MainLayout = () => (
 )
 
 const PortalLayout = () => {
-	const [sidebarOpen, setSidebarOpen] = useState(() => {
-		try {
-			return localStorage.getItem('portalSidebarOpen') === 'true'
-		} catch {
-			return false
-		}
-	})
-
-	useEffect(() => {
-		try {
-			localStorage.setItem('portalSidebarOpen', sidebarOpen)
-		} catch {
-			// ignore
-		}
-	}, [sidebarOpen])
+	const loggedInUser = {
+		id: '000001',
+		firstName: 'Muyiwa',
+		enrolled_tracks: ['A', 'T'],
+		active_track: 'A',
+	}
+	const [activeTrack, setActiveTrack] = useState(loggedInUser.active_track)
 
 	return (
 		<div className="min-h-screen flex flex-col bg-gray-50">
-			<PortalHeader onToggleSidebar={() => setSidebarOpen((s) => !s)} />
-
 			<div className="flex flex-1">
-				{/* Sidebar (desktop + mobile) */}
-				<PortalSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+				<GlobalSidebar activeTrack={activeTrack} setActiveTrack={setActiveTrack} user={loggedInUser} />
 
-				<main className="flex-1 overflow-y-auto p-6">
-					<Outlet />
-				</main>
+				<div className="flex-1 flex flex-col overflow-hidden">
+					<header className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
+						<h1 className="text-2xl font-serif font-bold text-slate-900">Welcome, {loggedInUser.firstName}</h1>
+						<button type="button" className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Open profile">
+							<FiUser className="h-5 w-5" />
+						</button>
+					</header>
+
+					<main className="flex-1 overflow-y-auto p-6">
+						<Outlet context={{ activeTrack, setActiveTrack, user: loggedInUser }} />
+					</main>
+				</div>
 			</div>
 
 			<PortalFooter />
@@ -135,7 +137,7 @@ function App() {
 					<Route path="/educational-consulting/book-consultation" element={<ConsultationBooking />} />
 					<Route path="/apply" element={<ApplicationEntry />} />
 					<Route path="/apply/step-1" element={<ApplicationForm />} />
-					<Route path="/apply/returning" element={<ApplicationForm />} />
+					<Route path="/apply/returning" element={<Navigate to="/student/transition-tech" replace />} />
 					<Route path="/application" element={<ApplicationForm />} />
 					<Route path="/exam-registration" element={<ExamRegistration />} />
 					<Route path="/contact" element={<Contact />} />
@@ -175,6 +177,9 @@ function App() {
 					<Route path="/student/calendar" element={<StudentCalendar />} />
 					<Route path="/student/elibrary" element={<StudentLibrary />} />
 					<Route path="/student/settings" element={<StudentSettings />} />
+					<Route path="/student/university-admissions" element={<UniversityAdmissions />} />
+					<Route path="/portal/university-admissions" element={<UniversityAdmissions />} />
+					<Route path="/portal/careers" element={<CareerGraduation />} />
 					<Route path="/student/transition-tech" element={<TechTransitionForm />} />
 					<Route path="/dashboard/transition-tech" element={<TechTransitionForm />} />
 				</Route>

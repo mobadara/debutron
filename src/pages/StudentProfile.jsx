@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { FiEdit2, FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi'
+import { resolveStudentProfile } from '../data/utils/studentProfile'
 
 const ReadOnlyField = ({ label, value }) => (
   <div>
@@ -53,6 +54,12 @@ const EditableTextarea = ({ label, placeholder }) => {
 
 export default function StudentProfile() {
   const [saving, setSaving] = useState(false)
+  const student = resolveStudentProfile()
+  const enrolledTrackLabel = student.enrolled_tracks.includes('A')
+    ? 'Academic Track'
+    : student.enrolled_tracks.includes('T')
+      ? 'Tech Innovation Track'
+      : 'Tech Innovation Track'
 
   function handleSave() {
     setSaving(true)
@@ -69,13 +76,13 @@ export default function StudentProfile() {
 
       <section className="grid grid-cols-1 gap-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ReadOnlyField label="First Name" value="Muyiwa" />
-          <ReadOnlyField label="Last Name" value="Obadara" />
+          <ReadOnlyField label="First Name" value={student.firstName} />
+          <ReadOnlyField label="Last Name" value={student.lastName} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ReadOnlyField label="Student ID" value="000001" />
-          <ReadOnlyField label="Enrolled Track" value="Tech Innovation Track" />
+          <ReadOnlyField label="Student ID" value={student.id} />
+          <ReadOnlyField label="Enrolled Track" value={enrolledTrackLabel} />
         </div>
       </section>
 
