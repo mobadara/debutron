@@ -1,130 +1,155 @@
-import React from 'react'
-import { FiPrinter } from 'react-icons/fi'
-import { portalStudentIdentity } from '../data/portal/notificationsData'
-import { tuitionStudentTrack } from '../data/portal/tuitionData'
+import { useOutletContext } from 'react-router-dom'
+import { FiDownload, FiPrinter } from 'react-icons/fi'
 
-const techTrackData = [
-  {
-    id: 'DSC-101',
-    title: 'Mathematical Foundations',
-    score: '92%',
-    grade: 'A',
-  },
-]
-
-const academicTrackData = [
-  {
-    id: 'MATH-01',
-    title: 'Mathematics - Trigonometry Test I',
-    score: '88%',
-    grade: 'A',
-  },
-  {
-    id: 'PHY-02',
-    title: 'Physics - Equilibrium of Forces Test II',
-    score: '75%',
-    grade: 'B',
-  },
-]
-
-function getGradeClass(grade) {
-  if (!grade) return 'text-gray-700'
-  if (grade.startsWith('A')) return 'text-green-600 font-bold'
-  if (grade.startsWith('B')) return 'text-blue-600 font-bold'
-  return 'text-gray-700 font-semibold'
+const transcriptData = {
+	'data-science': [
+		{ id: 'MOD-101', title: 'Python Programming Foundation', hours: 40, score: 92, status: 'Distinction' },
+		{ id: 'MOD-102', title: 'Exploratory Data Analysis', hours: 50, score: 88, status: 'Pass' },
+		{ id: 'MOD-103', title: 'Machine Learning Algorithms', hours: 60, score: null, status: 'In Progress' },
+	],
+	utme: [
+		{ id: 'PHY-01', title: 'Advanced Physics', credits: 4, grade: 'A', points: 5.0 },
+		{ id: 'MTH-01', title: 'General Mathematics', credits: 4, grade: 'B', points: 4.0 },
+		{ id: 'CHM-01', title: 'Organic Chemistry', credits: 4, grade: null, points: null },
+	],
 }
 
-export default function StudentTranscript() {
-  const studentTrack = tuitionStudentTrack
-  const studentData = portalStudentIdentity
-  const isAcademicTrack = studentTrack.toLowerCase().includes('academic')
-  const activeData = isAcademicTrack ? academicTrackData : techTrackData
+function StudentTranscript() {
+	const { activeTrack, activeProgram, user, programNames } = useOutletContext()
+	const dob = 'July 17, 1993'
+	const records = transcriptData[activeProgram] || []
 
-  const average =
-    activeData.reduce((sum, item) => sum + (Number.parseFloat(item.score) || 0), 0) /
-    activeData.length
-  const avgFormatted = `${average.toFixed(1)}%`
+	return (
+		<div className="max-w-5xl mx-auto mt-6">
+			<div className="flex justify-end gap-4 mb-4">
+				<button
+					type="button"
+					onClick={() => window.print()}
+					className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-semibold flex items-center gap-2"
+				>
+					<FiPrinter />
+					Print
+				</button>
+				<button
+					type="button"
+					className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-semibold flex items-center gap-2"
+				>
+					<FiDownload />
+					Download PDF
+				</button>
+			</div>
 
-  return (
-    <div className="max-w-6xl mx-auto p-8">
-      <header>
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="font-serif text-3xl text-debutron-navy">Academic Progress Record</h2>
-          <button
-            onClick={() => window.print()}
-            className="print:hidden bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-bold flex items-center gap-2 shadow-sm"
-          >
-            <FiPrinter />
-            Print Official Record
-          </button>
-        </div>
+			<div className="max-w-5xl mx-auto p-8 bg-white shadow-md border border-slate-200 mt-6">
+				<header className="border-b-4 border-slate-900 pb-6 mb-8">
+					<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+						<h1 className="text-3xl font-serif font-black uppercase text-slate-900">Debutron Lab.</h1>
+						<p className="text-xl font-bold tracking-widest text-slate-400">OFFICIAL TRANSCRIPT</p>
+					</div>
 
-        <div className="mb-6 rounded-sm border border-slate-200 bg-white p-4">
-          <div className="grid grid-cols-1 gap-3 text-sm text-slate-700 md:grid-cols-3">
-            <p>
-              <span className="font-bold text-slate-900">Student Name:</span> {studentData.name}
-            </p>
-            <p>
-              <span className="font-bold text-slate-900">Student ID:</span> {studentData.id}
-            </p>
-            <p>
-              <span className="font-bold text-slate-900">Track:</span> {studentTrack}
-            </p>
-          </div>
-        </div>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm text-slate-800">
+						<div className="space-y-2">
+							<p>
+								First Name: <span className="font-bold">{user.firstName}</span>
+							</p>
+							<p>
+								Last Name: <span className="font-bold">{user.lastName || 'Obadara'}</span>
+							</p>
+							<p>
+								Date of Birth: <span className="font-bold">{dob}</span>
+							</p>
+						</div>
 
-        <div className="bg-debutron-navy text-white p-6 rounded-sm flex justify-between items-center mb-8 shadow-md">
-          <div>
-            <div className="text-sm font-sans">Overall Average Score</div>
-            <div className="mt-1 text-sm text-white/90">Summary of performance</div>
-          </div>
+						<div className="space-y-2">
+							<p>
+								Program: <span className="font-bold">{programNames?.[activeProgram] || '—'}</span>
+							</p>
+							{activeTrack === 'A' ? (
+								<p>
+									Session: <span className="font-bold">2025/2026</span>
+								</p>
+							) : (
+								<p>
+									Cohort: <span className="font-bold">2026 - B</span>
+								</p>
+							)}
+						</div>
+					</div>
+				</header>
 
-          <div className="flex items-center gap-4 flex-col md:flex-row">
-            <div className="text-right">
-              <div className="font-mono text-4xl font-bold text-blue-300">{avgFormatted}</div>
-              <div className="mt-2">
-                <span className="bg-blue-500/30 text-blue-100 text-xs px-2 py-1 rounded">
-                  Excellent Standing
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+				{activeTrack === 'T' && (
+					<table className="w-full text-left border-collapse">
+						<thead>
+							<tr className="border-b border-slate-200 text-slate-600 text-sm">
+								<th className="py-3 pr-3 font-semibold">Module Code</th>
+								<th className="py-3 pr-3 font-semibold">Module Title</th>
+								<th className="py-3 pr-3 font-semibold">Contact Hours</th>
+								<th className="py-3 pr-3 font-semibold">Project Score</th>
+								<th className="py-3 pr-3 font-semibold">Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{records.map((record) => (
+								<tr key={record.id} className="border-b border-slate-100 text-sm text-slate-800 even:bg-slate-50">
+									<td className="py-3 pr-3">{record.id}</td>
+									<td className="py-3 pr-3">{record.title}</td>
+									<td className="py-3 pr-3">{record.hours ?? '-'}</td>
+									<td className="py-3 pr-3">{record.score ?? '-'}</td>
+									<td className="py-3 pr-3">{record.status ?? '-'}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				)}
 
-      <section>
-        <h3 className="font-serif text-xl mb-4">
-          {isAcademicTrack ? 'Subject Breakdown' : 'Module Breakdown'}
-        </h3>
+				{activeTrack === 'A' && (
+					<table className="w-full text-left border-collapse">
+						<thead>
+							<tr className="border-b border-slate-200 text-slate-600 text-sm">
+								<th className="py-3 pr-3 font-semibold">Course Code</th>
+								<th className="py-3 pr-3 font-semibold">Course Title</th>
+								<th className="py-3 pr-3 font-semibold">Credit Units</th>
+								<th className="py-3 pr-3 font-semibold">Letter Grade</th>
+								<th className="py-3 pr-3 font-semibold">Points</th>
+							</tr>
+						</thead>
+						<tbody>
+							{records.map((record) => (
+								<tr key={record.id} className="border-b border-slate-100 text-sm text-slate-800">
+									<td className="py-3 pr-3">{record.id}</td>
+									<td className="py-3 pr-3">{record.title}</td>
+									<td className="py-3 pr-3">{record.credits ?? '-'}</td>
+									<td className="py-3 pr-3">{record.grade ?? '-'}</td>
+									<td className="py-3 pr-3">{record.points ?? '-'}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				)}
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden">
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">Course Code</th>
-                <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">
-                  {isAcademicTrack ? 'Assessment Title' : 'Module Name'}
-                </th>
-                <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">Score (%)</th>
-                <th className="bg-gray-50 text-gray-500 font-sans text-xs uppercase tracking-wider text-left p-4 border-b border-gray-200">Grade</th>
-              </tr>
-            </thead>
+				<div className="mt-8 p-4 bg-slate-50 border border-slate-200 flex justify-end gap-12">
+					{activeTrack === 'A' ? (
+						<p className="text-sm text-slate-700">
+							Cumulative GPA (CGPA): <span className="font-bold text-slate-900">4.50 / 5.00</span>
+						</p>
+					) : (
+						<p className="text-sm text-slate-700">
+							Overall Program Average: <span className="font-bold text-slate-900">90% (Distinction)</span>
+						</p>
+					)}
+				</div>
 
-            <tbody>
-              {activeData.map((item) => (
-                <tr key={item.id} className="odd:bg-white even:bg-gray-50">
-                  <td className="p-4 text-sm text-gray-700 border-b border-gray-100">{item.id}</td>
-                  <td className="p-4 text-sm text-gray-700 border-b border-gray-100">{item.title}</td>
-                  <td className="p-4 text-sm text-gray-700 border-b border-gray-100">{item.score}</td>
-                  <td className={`p-4 text-sm border-b border-gray-100 ${getGradeClass(item.grade)}`}>
-                    {item.grade}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-  )
+				<footer className="mt-16 pt-8 border-t-2 border-slate-200 flex justify-between items-end gap-6">
+					<p className="text-xs text-slate-500 max-w-xl">
+						This document is electronically generated by the Debutron Lab Student Information System. Any alterations render it invalid.
+					</p>
+
+					<div className="border-t border-slate-900 w-48 text-center pt-2 text-sm font-bold">
+						Office of the Registrar
+					</div>
+				</footer>
+			</div>
+		</div>
+	)
 }
+
+export default StudentTranscript

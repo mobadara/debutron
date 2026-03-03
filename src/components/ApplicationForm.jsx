@@ -17,6 +17,7 @@ const initialFormData = {
 	state: '',
 	country: '',
 	programType: '',
+	program: '',
 	secondarySchool: '',
 	studyMode: '',
 	hardwareAccess: '',
@@ -51,6 +52,20 @@ const initialFiles = {
 }
 
 const inputStyles = 'w-full border border-gray-300 p-3 rounded-sm focus:border-debutron-navy focus:ring-1 focus:ring-debutron-navy outline-none font-sans'
+
+const academicPrograms = [
+	{ id: 'o-level', name: 'O-Level Mastery (WASSCE/GCE/NECO)', available: true },
+	{ id: 'utme', name: 'UTME Accelerator', available: true },
+	{ id: 'a-level', name: 'A-Level Excellence', available: false },
+]
+
+const techPrograms = [
+	{ id: 'data-science', name: 'Applied Data Science & Machine Learning', available: true },
+	{ id: 'data-analytics', name: 'Data Analytics & Insights', available: true },
+	{ id: 'cloud', name: 'Cloud Infrastructure & Engineering', available: true },
+	{ id: 'cyber', name: 'Cyber Defence & Security', available: true },
+	{ id: 'fullstack', name: 'Full-stack Software Engineering', available: true },
+]
 
 const FieldLabel = ({ text, hint }) => (
 	<label className="block font-sans text-sm font-bold text-debutron-navy mb-1 flex items-center gap-2">
@@ -116,6 +131,13 @@ function ApplicationForm() {
 		() => states.find((stateItem) => stateItem.isoCode === formData.state),
 		[states, formData.state]
 	)
+
+	const currentPrograms =
+		formData.programType === 'Academic Track'
+			? academicPrograms
+			: formData.programType === 'Tech Innovation Track'
+				? techPrograms
+				: []
 
 	const generateReference = () => {
 		const digits = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('')
@@ -210,6 +232,9 @@ function ApplicationForm() {
 			if (name === 'programType' && value !== 'Academic Track') {
 				delete nextErrors.academicReferenceLetter
 			}
+			if (name === 'programType') {
+				delete nextErrors.program
+			}
 			return nextErrors
 		})
 
@@ -218,6 +243,22 @@ function ApplicationForm() {
 			[name]: value,
 			...(name === 'country' ? { state: '' } : {}),
 			...(name === 'programType' && value !== 'Tech Innovation Track' ? { studyMode: '', hardwareAccess: '' } : {}),
+			...(name === 'programType' ? { program: '' } : {}),
+		}))
+	}
+
+	const selectProgram = (programItem) => {
+		if (!programItem.available) return
+
+		setErrors((prev) => {
+			const nextErrors = { ...prev }
+			delete nextErrors.program
+			return nextErrors
+		})
+
+		setFormData((prev) => ({
+			...prev,
+			program: programItem.id,
 		}))
 	}
 
@@ -258,6 +299,7 @@ function ApplicationForm() {
 
 		if (step === 1) {
 			if (isBlank(formData.programType)) stepErrors.programType = 'Please select a program track.'
+			if (!isBlank(formData.programType) && isBlank(formData.program)) stepErrors.program = 'Please select a specific program.'
 		}
 
 		if (step === 2) {
@@ -375,6 +417,7 @@ function ApplicationForm() {
 	const summaryItems = useMemo(
 		() => [
 			{ label: 'Program Type', value: formData.programType || '—' },
+			{ label: 'Specific Program', value: currentPrograms.find((programItem) => programItem.id === formData.program)?.name || '—' },
 			...(formData.programType === 'Tech Innovation Track'
 				? [
 					{ label: 'Highest Education', value: formData.highestEducation || '—' },
@@ -417,7 +460,7 @@ function ApplicationForm() {
 			{ label: 'Date of Birth', value: formData.dateOfBirth || '—' },
 			{ label: 'Accommodations', value: formData.accommodations || '—' },
 		],
-		[formData, selectedCountry?.name, selectedState?.name, states.length]
+		[formData, currentPrograms, selectedCountry?.name, selectedState?.name, states.length]
 	)
 
 	return (
@@ -446,6 +489,10 @@ function ApplicationForm() {
 						<div>
 							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">Program Track</p>
 							<p className="font-sans text-sm text-gray-800">{formData.programType || '—'}</p>
+						</div>
+						<div>
+							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">Specific Program</p>
+							<p className="font-sans text-sm text-gray-800">{currentPrograms.find((programItem) => programItem.id === formData.program)?.name || '—'}</p>
 						</div>
 						<div>
 							<p className="font-sans text-xs font-semibold uppercase tracking-wide text-gray-500">{formData.programType === 'Tech Innovation Track' ? 'Assigned Cohort' : 'Academic Session'}</p>
@@ -539,6 +586,33 @@ function ApplicationForm() {
 							</label>
 						</div>
 						<FieldError message={errors.programType} />
+
+						{formData.programType && (
+							<>
+								<h4 className="text-xl font-bold mt-8 mb-4">Select Your Specific Program</h4>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									{currentPrograms.map((prog) => (
+										<div
+											key={prog.id}
+											onClick={() => selectProgram(prog)}
+											className={
+												prog.available
+													? `border-2 p-4 cursor-pointer hover:border-slate-900 transition-colors ${formData.program === prog.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white'}`
+													: 'border-2 border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed relative p-4'
+											}
+										>
+											{!prog.available && (
+												<span className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">
+													Coming Soon
+												</span>
+											)}
+											<p className="font-medium pr-20">{prog.name}</p>
+										</div>
+									))}
+								</div>
+								<FieldError message={errors.program} />
+							</>
+						)}
 					</div>
 				)}
 

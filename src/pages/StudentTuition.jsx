@@ -1,381 +1,322 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { FiPrinter } from 'react-icons/fi'
+import { useEffect, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
+import { FiCreditCard, FiCheckCircle, FiClock, FiDownloadCloud, FiPrinter, FiX } from 'react-icons/fi'
 import TransactionReceipt from '../components/TransactionReceipt'
-import { initialTuitionPaymentHistory, tuitionStudentTrack } from '../data/portal/tuitionData'
 
-const feeCategories = [
-  { id: 'tuition', label: 'Tuition Fees', baseAmountNGN: 500000, amountPaidNGN: 150000 },
-  { id: 'other', label: 'Other Fees (Lab, ID, etc.)', baseAmountNGN: 25000, amountPaidNGN: 0 }
-]
-
-const TUITION_STORAGE_KEY = 'debutron-student-tuition-state'
-const TUITION_HISTORY_STORAGE_KEY = 'debutron-student-tuition-history'
-
-export default function StudentTuition() {
-  const studentTrack = tuitionStudentTrack
-  const [activeFeeTab, setActiveFeeTab] = useState(() => {
-    try {
-      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
-      if (!raw) return feeCategories[0].id
-      const parsed = JSON.parse(raw)
-      const exists = feeCategories.some((fee) => fee.id === parsed.activeFeeTab)
-      return exists ? parsed.activeFeeTab : feeCategories[0].id
-    } catch {
-      return feeCategories[0].id
-    }
-  })
-  const currentFeeData = feeCategories.find((fee) => fee.id === activeFeeTab) || feeCategories[0]
-  const balanceDue = currentFeeData.baseAmountNGN - currentFeeData.amountPaidNGN
-
-  const [paymentHistory, setPaymentHistory] = useState(() => {
-    try {
-      const raw = localStorage.getItem(TUITION_HISTORY_STORAGE_KEY)
-      if (!raw) return initialTuitionPaymentHistory
-      const parsed = JSON.parse(raw)
-      return Array.isArray(parsed) ? parsed : initialTuitionPaymentHistory
-    } catch {
-      return initialTuitionPaymentHistory
-    }
-  })
-
-  const [paymentAmount, setPaymentAmount] = useState(() => {
-    try {
-      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
-      if (!raw) return feeCategories[0].baseAmountNGN - feeCategories[0].amountPaidNGN
-      const parsed = JSON.parse(raw)
-      return Number.isFinite(parsed.paymentAmount)
-        ? parsed.paymentAmount
-        : feeCategories[0].baseAmountNGN - feeCategories[0].amountPaidNGN
-    } catch {
-      return feeCategories[0].baseAmountNGN - feeCategories[0].amountPaidNGN
-    }
-  })
-  const [promoCode, setPromoCode] = useState(() => {
-    try {
-      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
-      if (!raw) return ''
-      const parsed = JSON.parse(raw)
-      return typeof parsed.promoCode === 'string' ? parsed.promoCode : ''
-    } catch {
-      return ''
-    }
-  })
-  const [discount, setDiscount] = useState(() => {
-    try {
-      const raw = localStorage.getItem(TUITION_STORAGE_KEY)
-      if (!raw) return 0
-      const parsed = JSON.parse(raw)
-      return Number.isFinite(parsed.discount) ? parsed.discount : 0
-    } catch {
-      return 0
-    }
-  })
-  const [promoMessage, setPromoMessage] = useState('')
-  const [selectedReceipt, setSelectedReceipt] = useState(null)
-  const [shouldAutoPrint, setShouldAutoPrint] = useState(false)
-  const hasInitialized = useRef(false)
-
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true
-      return
-    }
-
-    setPaymentAmount(balanceDue)
-    setDiscount(0)
-    setPromoCode('')
-    setPromoMessage('')
-  }, [activeFeeTab, balanceDue])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        TUITION_STORAGE_KEY,
-        JSON.stringify({
-          activeFeeTab,
-          paymentAmount,
-          promoCode,
-          discount
-        })
-      )
-    } catch {
-      // ignore storage write failures
-    }
-  }, [activeFeeTab, paymentAmount, promoCode, discount])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(TUITION_HISTORY_STORAGE_KEY, JSON.stringify(paymentHistory))
-    } catch {
-      // ignore storage write failures
-    }
-  }, [paymentHistory])
-
-  useEffect(() => {
-    if (!selectedReceipt || !shouldAutoPrint) return
-
-    const timeoutId = window.setTimeout(() => {
-      window.print()
-    }, 300)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [selectedReceipt, shouldAutoPrint])
-
-  const finalPayment = Math.max(0, Number(paymentAmount) - Number(discount))
-
-  const generateTxnDescription = (amountBeingPaid, previousBalance, totalFee, trackName, feeLabel) => {
-    if (amountBeingPaid === totalFee) {
-      return `Full Payment for ${feeLabel} - ${trackName}`
-    } else if (amountBeingPaid === previousBalance) {
-      return `Final Balance Clearance for ${feeLabel} - ${trackName}`
-    } else {
-      return `Payment for ${feeLabel} - ${trackName}`
-    }
-  }
-
-  function handleApplyPromo() {
-    const code = promoCode.trim()
-    if (!code) {
-      setPromoMessage('Enter a voucher code')
-      return
-    }
-
-    // Mock promo: apply 10% discount of the current payment amount
-    const newDiscount = Math.round(Number(paymentAmount) * 0.1)
-    setDiscount(newDiscount)
-    setPromoMessage(`Voucher applied — ₦${newDiscount.toLocaleString()} discount`)
-  }
-
-  function handleMockPayment(e) {
-    e.preventDefault()
-
-    const currentTrack = studentTrack === 'Academic Track' ? 'Academic Track' : 'Tech Innovation Track'
-    const autoDescription = generateTxnDescription(
-      paymentAmount,
-      balanceDue,
-      currentFeeData.baseAmountNGN,
-      currentTrack,
-      currentFeeData.label
-    )
-
-    const newTxn = {
-      id: `TXN-${Math.floor(Math.random() * 1000000)}`,
-      date: new Date().toLocaleDateString(),
-      studentName: 'Muyiwa',
-      studentId: '000001',
-      description: autoDescription,
-      currency: 'NGN',
-      amountPaid: paymentAmount,
-      balance: Math.max(0, balanceDue - paymentAmount),
-      method: 'Flutterwave',
-      status: 'Successful'
-    }
-
-    setPaymentHistory((prevHistory) => [newTxn, ...prevHistory])
-    setSelectedReceipt(newTxn)
-    setShouldAutoPrint(false)
-    alert('Payment successful! Receipt generated.')
-  }
-
-  const handlePrintReceipt = (txnId) => {
-    const receipt = paymentHistory.find((txn) => txn.id === txnId)
-    if (!receipt) return
-    setSelectedReceipt(receipt)
-    setShouldAutoPrint(true)
-  }
-
-  function handlePrintSelectedReceipt() {
-    if (!selectedReceipt) return
-    setShouldAutoPrint(false)
-    window.print()
-  }
-
-  function handleCloseReceipt() {
-    setSelectedReceipt(null)
-    setShouldAutoPrint(false)
-  }
-
-  return (
-    <div className="max-w-6xl mx-auto p-8">
-      {selectedReceipt && (
-        <style>{`
-          @media print {
-            .tuition-screen,
-            .receipt-actions {
-              display: none !important;
-            }
-
-            body * {
-              visibility: hidden;
-            }
-
-            .receipt-print-area,
-            .receipt-print-area * {
-              visibility: visible;
-            }
-
-            .receipt-print-area {
-              display: block !important;
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-              margin: 0 !important;
-              padding: 0 !important;
-            }
-          }
-        `}</style>
-      )}
-
-      <div className={`tuition-screen ${selectedReceipt ? 'print:hidden' : ''}`}>
-        <header className="mb-6">
-          <h1 className="font-serif text-3xl text-debutron-navy">Tuition &amp; Financial Aid</h1>
-        </header>
-
-        <div className="border-b border-gray-200 mb-8 flex gap-8">
-          {feeCategories.map((fee) => (
-            <button
-              key={fee.id}
-              type="button"
-              onClick={() => setActiveFeeTab(fee.id)}
-              className={
-                activeFeeTab === fee.id
-                  ? 'border-b-2 border-debutron-navy text-debutron-navy font-bold pb-2'
-                  : 'text-gray-500 hover:text-slate-800 pb-2'
-              }
-            >
-              {fee.label}
-            </button>
-          ))}
-        </div>
-
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 border border-gray-200 shadow-sm">
-            <div className="text-sm text-gray-500">Total Fee ({currentFeeData.label})</div>
-            <div className="mt-2 text-2xl font-bold">₦{currentFeeData.baseAmountNGN.toLocaleString()}</div>
-          </div>
-
-          <div className="bg-white p-6 border border-gray-200 shadow-sm">
-            <div className="text-sm text-gray-500">Amount Paid</div>
-            <div className="mt-2 text-2xl font-bold">₦{currentFeeData.amountPaidNGN.toLocaleString()}</div>
-          </div>
-
-          <div className="bg-white p-6 border border-gray-200 shadow-sm">
-            <div className="text-sm text-gray-500">Current Balance</div>
-            <div className="mt-2 text-2xl font-bold text-amber-600">₦{balanceDue.toLocaleString()}</div>
-          </div>
-        </section>
-
-        <div className="bg-white p-8 border-t-4 border-debutron-navy shadow-sm max-w-2xl mt-8">
-          <h2 className="font-sans text-lg font-medium mb-4">Proceed with a Payment</h2>
-
-          <label className="block text-sm text-gray-600 mb-2">Amount to Pay (₦)</label>
-          <input
-            type="number"
-            value={paymentAmount}
-            onChange={(e) => setPaymentAmount(Number(e.target.value))}
-            className="w-full rounded-sm border border-gray-200 p-3 mb-4"
-            min={0}
-            max={balanceDue}
-          />
-
-          <div className="flex gap-2 items-start">
-            <div className="flex-1">
-              <label className="block text-sm text-gray-600 mb-2">Voucher Code</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  placeholder="Enter promo code"
-                  className="w-full rounded-sm border border-gray-200 p-3"
-                />
-                <button onClick={handleApplyPromo} className="bg-debutron-navy text-white px-4 py-3 rounded-sm">Apply</button>
-              </div>
-
-              {promoMessage && <p className="mt-2 text-sm text-green-600">{promoMessage}</p>}
-            </div>
-          </div>
-
-          <div className="mt-6 border-t pt-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-sm text-gray-600">Discount</div>
-              <div className="text-sm font-medium">₦{discount.toLocaleString()}</div>
-            </div>
-
-            <div className="flex items-center justify-between mb-6">
-              <div className="text-lg font-semibold">Total to Pay</div>
-              <div className="text-xl font-bold">₦{finalPayment.toLocaleString()}</div>
-            </div>
-
-            <button
-              onClick={handleMockPayment}
-              className="px-8 py-3 w-full rounded-sm bg-debutron-navy text-white hover:bg-slate-800"
-            >
-              Pay {currentFeeData.label} via Secure Gateway
-            </button>
-          </div>
-        </div>
-
-        <section>
-          <h2 className="font-serif text-2xl text-slate-900 mt-12 mb-6">Payment History &amp; Receipts</h2>
-          <div className="bg-white border border-slate-300 shadow-sm overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="bg-slate-50 text-slate-700 font-bold text-sm uppercase p-4 border-b border-slate-300 text-left">Transaction ID</th>
-                  <th className="bg-slate-50 text-slate-700 font-bold text-sm uppercase p-4 border-b border-slate-300 text-left">Date</th>
-                  <th className="bg-slate-50 text-slate-700 font-bold text-sm uppercase p-4 border-b border-slate-300 text-left">Student</th>
-                  <th className="bg-slate-50 text-slate-700 font-bold text-sm uppercase p-4 border-b border-slate-300 text-left">Amount Paid</th>
-                  <th className="bg-slate-50 text-slate-700 font-bold text-sm uppercase p-4 border-b border-slate-300 text-left">Balance</th>
-                  <th className="bg-slate-50 text-slate-700 font-bold text-sm uppercase p-4 border-b border-slate-300 text-left">Method</th>
-                  <th className="bg-slate-50 text-slate-700 font-bold text-sm uppercase p-4 border-b border-slate-300 text-left">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paymentHistory.map((txn) => (
-                  <tr key={txn.id} className="border-b border-slate-200 last:border-b-0">
-                    <td className="p-4 text-slate-800">{txn.id}</td>
-                    <td className="p-4 text-slate-700">{txn.date}</td>
-                    <td className="p-4 text-slate-700">{txn.studentName}</td>
-                    <td className="p-4 text-slate-700">{txn.currency} {txn.amountPaid.toLocaleString()}</td>
-                    <td className="p-4 text-slate-700">{txn.currency} {txn.balance.toLocaleString()}</td>
-                    <td className="p-4 text-slate-700">{txn.method}</td>
-                    <td className="p-4">
-                      <button onClick={() => handlePrintReceipt(txn.id)} className="text-blue-700 hover:underline font-bold flex items-center gap-2">
-                        <FiPrinter /> Print Receipt
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-
-      {selectedReceipt && (
-        <section className="mt-10 print:mt-0 receipt-print-area">
-          <div className="flex items-center justify-end gap-3 mb-4 print:hidden receipt-actions">
-            <button
-              type="button"
-              onClick={handleCloseReceipt}
-              className="px-4 py-2 border border-gray-300 rounded-sm text-slate-700 hover:bg-slate-50"
-            >
-              Close Receipt
-            </button>
-            <button
-              type="button"
-              onClick={handlePrintSelectedReceipt}
-              className="px-4 py-2 bg-debutron-navy text-white rounded-sm hover:bg-slate-800"
-            >
-              Print / Save PDF
-            </button>
-          </div>
-
-          <TransactionReceipt transaction={selectedReceipt} />
-        </section>
-      )}
-    </div>
-  )
+const billingProfiles = {
+	utme: {
+		plan: 'Installment',
+		nextDueDate: '2026-04-01',
+		NGN: { total: 150000, paid: 50000, currency: '₦', symbol: '₦' },
+		USD: { total: 100, paid: 35, currency: '$', symbol: '$' },
+	},
+	'data-science': {
+		plan: 'Full Payment',
+		nextDueDate: null,
+		NGN: { total: 500000, paid: 500000, currency: '₦', symbol: '₦' },
+		USD: { total: 325, paid: 325, currency: '$', symbol: '$' },
+	},
+	cloud: {
+		plan: 'Installment',
+		nextDueDate: '2026-05-15',
+		NGN: { total: 600000, paid: 300000, currency: '₦', symbol: '₦' },
+		USD: { total: 390, paid: 195, currency: '$', symbol: '$' },
+	},
 }
+
+function StudentTuition() {
+	const { activeTrack, activeProgram, programNames, user } = useOutletContext()
+	const [currency, setCurrency] = useState('NGN')
+	const [isModalOpen, setIsModalOpen] = useState(false)
+	const [paymentAmount, setPaymentAmount] = useState('')
+	const [selectedReceipt, setSelectedReceipt] = useState(null)
+	const [shouldAutoPrint, setShouldAutoPrint] = useState(false)
+
+	const profile = billingProfiles[activeProgram] || billingProfiles.utme
+	const activeFinancials = profile[currency]
+	const balance = activeFinancials.total - activeFinancials.paid
+	const isOverBalance = paymentAmount > balance
+	const isInvalidAmount = paymentAmount <= 0 || isNaN(paymentAmount)
+
+	const mockTransactions = [
+		...(user?.enrolled_tracks?.length > 1
+			? [{ date: '2026-02-15', desc: 'Application Fee Waiver (Alumni Benefit)', ref: 'WAIVER-001', amount: 0, status: 'Applied' }]
+			: []),
+		{
+			date: '2026-02-16',
+			desc: `Tuition Deposit - ${programNames?.[activeProgram] || activeProgram}`,
+			ref: 'TXN-84729',
+			amount: activeFinancials.paid,
+			status: 'Cleared',
+		},
+	]
+
+	const transactions = [...mockTransactions]
+
+	const openReceipt = (txn) => {
+		const amountPaid = Number(txn.amount || 0)
+		const transactionReceiptData = {
+			id: txn.ref,
+			date: txn.date,
+			studentName: `${user?.firstName || 'Student'} ${user?.lastName || 'Obadara'}`,
+			studentId: user?.id || 'N/A',
+			description: txn.desc,
+			currency: activeFinancials.symbol,
+			amountPaid,
+			balance: Math.max(0, balance - amountPaid),
+			method: 'Flutterwave',
+			status: txn.status,
+		}
+
+		setSelectedReceipt(transactionReceiptData)
+	}
+
+	const handlePrintReceipt = (txn) => {
+		openReceipt(txn)
+		setShouldAutoPrint(true)
+	}
+
+	useEffect(() => {
+		if (!selectedReceipt || !shouldAutoPrint) return
+
+		const timeoutId = window.setTimeout(() => {
+			window.print()
+			setShouldAutoPrint(false)
+		}, 200)
+
+		return () => window.clearTimeout(timeoutId)
+	}, [selectedReceipt, shouldAutoPrint])
+
+	return (
+		<div className="max-w-6xl mx-auto p-8">
+			<header className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+				<div>
+					<h1 className="text-3xl font-serif font-bold text-slate-900">Financial Overview</h1>
+					<p className="mt-2 text-sm text-slate-600">
+						Displaying records for {programNames?.[activeProgram] || 'Unknown Program'}
+					</p>
+					<p className="mt-1 text-xs text-slate-500">
+						Student: {user?.firstName || 'Student'} ({user?.id || 'N/A'}) • Track: {activeTrack === 'A' ? 'Academic' : 'Tech'}
+					</p>
+				</div>
+
+				<div className="flex items-center gap-3">
+					<div className="flex bg-slate-100 p-1 rounded-sm border border-slate-200">
+						<button
+							type="button"
+							onClick={() => setCurrency('NGN')}
+							className={`px-4 py-1 text-sm font-bold rounded-sm transition-colors ${currency === 'NGN' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+						>
+							NGN
+						</button>
+						<button
+							type="button"
+							onClick={() => setCurrency('USD')}
+							className={`px-4 py-1 text-sm font-bold rounded-sm transition-colors ${currency === 'USD' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+						>
+							USD
+						</button>
+					</div>
+
+					{profile.plan === 'Installment' ? (
+						<span className="inline-flex items-center gap-2 rounded-sm bg-yellow-100 px-4 py-2 text-sm font-semibold text-yellow-800">
+							<FiClock />
+							Payment Plan: {profile.plan}
+						</span>
+					) : (
+						<span className="inline-flex items-center gap-2 rounded-sm bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
+							<FiCheckCircle />
+							Payment Plan: {profile.plan}
+						</span>
+					)}
+				</div>
+			</header>
+
+			<section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+				<div className="bg-white p-6 border border-slate-200 shadow-sm border-t-4 border-slate-900">
+					<p className="text-sm text-slate-500 font-bold uppercase">Total Program Fee</p>
+					<p className="text-3xl font-black text-slate-900 mt-2">
+						{activeFinancials.currency}{activeFinancials.total.toLocaleString()}
+					</p>
+				</div>
+
+				<div className="bg-white p-6 border border-slate-200 shadow-sm border-t-4 border-emerald-500">
+					<p className="text-sm text-slate-500 font-bold uppercase">Total Cleared</p>
+					<p className="text-3xl font-black text-emerald-600 mt-2">
+						{activeFinancials.currency}{activeFinancials.paid.toLocaleString()}
+					</p>
+				</div>
+
+				{balance > 0 ? (
+					<div className="bg-red-50 border border-slate-200 shadow-sm border-t-4 border-red-500 p-6">
+						<p className="text-sm text-slate-500 font-bold uppercase">Outstanding Balance</p>
+						<p className="text-3xl font-black text-red-600 mt-2">
+							{activeFinancials.currency}{balance.toLocaleString()}
+						</p>
+						<button
+							type="button"
+							onClick={() => {
+								setPaymentAmount(balance)
+								setIsModalOpen(true)
+							}}
+							className="mt-4 px-4 py-2 bg-red-600 text-white font-semibold hover:bg-red-700"
+						>
+							Pay Now
+						</button>
+					</div>
+				) : (
+					<div className="bg-emerald-50 border border-slate-200 shadow-sm border-t-4 border-emerald-500 p-6">
+						<p className="text-sm text-slate-500 font-bold uppercase">Outstanding Balance</p>
+						<p className="text-3xl font-black text-emerald-600 mt-2">₦0</p>
+						<p className="mt-4 inline-flex items-center gap-2 text-emerald-700 font-semibold">
+							<FiCheckCircle />
+							Fully Paid
+						</p>
+					</div>
+				)}
+			</section>
+
+			<div className="mt-6 flex items-center gap-3 text-sm text-slate-600">
+				<FiCreditCard className="text-slate-500" />
+				<span>Next Due Date: {profile.nextDueDate || 'No pending due date'}</span>
+				<button type="button" className="ml-auto inline-flex items-center gap-2 border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-sm">
+					<FiDownloadCloud />
+					Download Statement
+				</button>
+			</div>
+
+			<section className="mt-12 bg-white border border-slate-200 shadow-sm overflow-hidden">
+				<div className="p-6 border-b border-slate-200 flex items-center justify-between gap-4">
+					<h2 className="text-lg font-bold text-slate-900">Transaction History</h2>
+				</div>
+
+				<table className="w-full text-left border-collapse">
+					<thead>
+						<tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+							<th className="px-6 py-3 font-bold">Date</th>
+							<th className="px-6 py-3 font-bold">Description</th>
+							<th className="px-6 py-3 font-bold">Reference</th>
+							<th className="px-6 py-3 font-bold">Amount</th>
+							<th className="px-6 py-3 font-bold">Status</th>
+							<th className="px-6 py-3 font-bold">Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{transactions.map((txn) => {
+							const isPositiveStatus = txn.status === 'Cleared' || txn.status === 'Applied'
+							const amountLabel = txn.amount === 0
+								? '₦0.00'
+								: `${activeFinancials.currency}${Number(txn.amount).toLocaleString()}`
+
+							return (
+								<tr key={txn.ref} className="border-b border-slate-100 even:bg-slate-50">
+									<td className="px-6 py-4 text-sm text-slate-700">{txn.date}</td>
+									<td className="px-6 py-4 text-sm text-slate-800">{txn.desc}</td>
+									<td className="px-6 py-4 text-sm font-medium text-slate-700">{txn.ref}</td>
+									<td className="px-6 py-4 text-sm font-semibold text-slate-900">{amountLabel}</td>
+									<td className={`px-6 py-4 text-sm font-semibold ${isPositiveStatus ? 'text-emerald-600' : 'text-amber-600'}`}>
+										{txn.status}
+									</td>
+									<td className="px-6 py-4 text-sm">
+										{txn.status === 'Cleared' || txn.status === 'Applied' ? (
+											<div className="flex flex-col items-start gap-1">
+												<button
+													type="button"
+													onClick={() => handlePrintReceipt(txn)}
+													className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-semibold"
+												>
+													<FiPrinter />
+													Print Receipt
+												</button>
+											</div>
+										) : (
+											<span>-</span>
+										)}
+									</td>
+								</tr>
+							)
+						})}
+					</tbody>
+				</table>
+			</section>
+
+			{isModalOpen && (
+				<div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+					<div className="bg-white w-full max-w-md rounded-md shadow-xl overflow-hidden">
+						<div className="bg-slate-900 text-white p-4 font-serif text-xl font-bold flex justify-between">
+							<span>Make a Payment</span>
+							<button
+								type="button"
+								onClick={() => setIsModalOpen(false)}
+								className="text-white hover:text-slate-200"
+								aria-label="Close payment modal"
+							>
+								<FiX />
+							</button>
+						</div>
+
+						<div className="p-6">
+							<p className="text-sm text-slate-700">
+								You are paying for: <span className="font-bold">{programNames?.[activeProgram] || activeProgram}</span>
+							</p>
+							<p className="mt-2 text-sm text-slate-700">
+								Outstanding Balance: {activeFinancials.symbol}{balance.toLocaleString()}
+							</p>
+
+							<div className="mt-5">
+								<label className="block text-sm font-semibold text-slate-700 mb-2">Amount to Pay</label>
+								<input
+									type="number"
+									value={paymentAmount}
+									onChange={(e) => setPaymentAmount(Number(e.target.value))}
+									className="border-2 border-slate-300 w-full p-3 text-lg font-bold"
+								/>
+								{isOverBalance && (
+									<p className="mt-2 text-sm text-red-600">Amount cannot exceed your outstanding balance.</p>
+								)}
+							</div>
+
+							<button
+								type="button"
+								disabled={isOverBalance || isInvalidAmount}
+								onClick={() => alert(`Launching Flutterwave for ${paymentAmount}`)}
+								className={`w-full mt-6 py-4 font-bold text-white transition-colors ${isOverBalance || isInvalidAmount ? 'bg-slate-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+							>
+								Proceed to Secure Payment -&gt;
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{selectedReceipt && (
+				<div className="fixed inset-0 bg-black/60 z-50 p-4 overflow-y-auto">
+					<div className="max-w-4xl mx-auto">
+						<div className="mb-4 flex justify-end gap-2 print:hidden">
+							<button
+								type="button"
+								onClick={() => window.print()}
+								className="inline-flex items-center gap-2 rounded-sm bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+							>
+								<FiPrinter />
+								Print Receipt
+							</button>
+							<button
+								type="button"
+								onClick={() => setSelectedReceipt(null)}
+								className="inline-flex items-center gap-2 rounded-sm border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+							>
+								<FiX />
+								Close
+							</button>
+						</div>
+
+						<TransactionReceipt transaction={selectedReceipt} />
+					</div>
+				</div>
+			)}
+		</div>
+	)
+}
+
+export default StudentTuition
