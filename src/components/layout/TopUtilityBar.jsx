@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
-import { FiMoon, FiSun, FiZoomIn, FiZoomOut } from 'react-icons/fi'
+import { FiMoon, FiPause, FiPlay, FiSquare, FiSun, FiZoomIn, FiZoomOut } from 'react-icons/fi'
 import { useA11y } from '../../context/A11yContext'
 import { topUtilityData } from '../../data/domains/marketingContent'
+import { useNarrator } from '../../hooks/useNarrator'
 
 function TopUtilityBar({ showUtilityLinks = true }) {
 	const { isDarkMode, setIsDarkMode, textScale, setTextScale } = useA11y()
+	const { isSpeaking, isPaused, readContent, pauseNarrator, stopNarrator } = useNarrator()
 
 	return (
 		<div className="bg-slate-900 dark:bg-black text-white px-6 py-2 flex justify-between items-center text-sm z-[1100] relative">
@@ -45,6 +47,38 @@ function TopUtilityBar({ showUtilityLinks = true }) {
 			)}
 
 			<div className="flex gap-4 items-center">
+				<button
+					type="button"
+					onClick={readContent}
+					aria-label={isSpeaking && isPaused ? 'Resume narrator' : 'Start narrator'}
+					className="inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 rounded-sm"
+				>
+					<FiPlay />
+					<span className="hidden sm:inline">{isSpeaking && isPaused ? 'Resume' : 'Read Page'}</span>
+				</button>
+
+				<button
+					type="button"
+					onClick={pauseNarrator}
+					disabled={!isSpeaking || isPaused}
+					aria-label="Pause narrator"
+					className="inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 rounded-sm"
+				>
+					<FiPause />
+					<span className="hidden sm:inline">Pause</span>
+				</button>
+
+				<button
+					type="button"
+					onClick={stopNarrator}
+					disabled={!isSpeaking && !isPaused}
+					aria-label="Stop narrator"
+					className="inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 rounded-sm"
+				>
+					<FiSquare />
+					<span className="hidden sm:inline">Stop</span>
+				</button>
+
 				<button
 					type="button"
 					onClick={() => setTextScale((prev) => (prev === 'normal' ? 'large' : 'xl'))}

@@ -140,7 +140,7 @@ function PortalLayout() {
 						</div>
 					</header>
 
-					<main className="flex-1 overflow-y-auto p-6">
+					<main id="main-content" className="flex-1 overflow-y-auto p-6">
 						<Outlet context={{ activeTrack, setActiveTrack, activeProgram, setActiveProgram, user: loggedInUser, programNames }} />
 					</main>
 				</div>

@@ -1,9 +1,9 @@
 export const mockLoggedInUser = {
-  id: "000001",
+  id: "022031",
   firstName: "Muyiwa",
   
   // Enrolled Tracks: 'A' (Academic), 'T' (Tech)
-  enrolled_tracks: ['T'], 
+  enrolled_tracks: ['T', 'A'], 
   
   // Specific Programs: 'utme', 'o-level', 'data-science', 'cloud', 'cyber', 'fullstack'
   enrolled_programs: ['utme', 'data-science'], 

@@ -76,7 +76,7 @@ const MainLayout = () => (
     <div className="flex flex-col min-h-screen">
         <TopUtilityBar />
         <Navbar />
-        <main className="flex-grow">
+        <main id="main-content" className="flex-grow">
             <Outlet />
         </main>
         <Footer />
