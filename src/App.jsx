@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { A11yProvider } from './context/A11yContext'
 
 // Layouts
 import Navbar from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import TopUtilityBar from './components/layout/TopUtilityBar'
-import PortalLayout from './layouts/PortalLayout'
 
 // Public Pages
 import Home from './pages/HomePage'
@@ -51,21 +51,6 @@ import ConsultationBooking from './components/ConsultationBooking'
 import ApplicationEntry from './components/ApplicationEntry'
 import ApplicationForm from './components/ApplicationForm'
 
-// Portal Pages
-import StudentDashboard from './pages/StudentDashboard'
-import StudentTranscript from './pages/StudentTranscript'
-import StudentCourses from './pages/StudentCourses'
-import CourseDetail from './pages/CourseDetail'
-import GraduationHub from './pages/GraduationHub'
-import StudentTuition from './pages/StudentTuition'
-import StudentProfile from './pages/StudentProfile'
-import StudentCalendar from './pages/StudentCalendar'
-import StudentLibrary from './pages/StudentLibrary'
-import StudentSettings from './pages/StudentSettings'
-import UniversityAdmissions from './pages/UniversityAdmissions'
-import CareerGraduation from './pages/CareerGraduation'
-import TechTransitionForm from './components/TechTransitionForm'
-
 // Fallback
 import NotFound from './pages/NotFoundPage'
 
@@ -87,93 +72,67 @@ const MainLayout = () => (
 
 function App() {
     return (
-        <Router>
-            <Routes>
-                {/* PUBLIC LAYOUT */}
-                <Route element={<MainLayout />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/admissions" element={<Admissions />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/who-we-are" element={<VisionValues />} />
-                    <Route path="/leadership" element={<LeadershipTeam />} />
-                    <Route path="/innovation-lab" element={<InnovationLab />} />
-                    <Route path="/accreditations-partnerships" element={<Accreditations />} />
-                    <Route path="/careers" element={<Careers />} />
-                    <Route path="/ai-data-models" element={<AiDataModels />} />
-                    <Route path="/enterprise-consulting" element={<EnterpriseConsulting />} />
-                    <Route path="/student-showcase" element={<StudentShowcase />} />
-                    <Route path="/o-level-mastery" element={<OLevelMastery />} />
-                    <Route path="/a-level-excellence" element={<ALevelExcellence />} />
-                    <Route path="/utme-accelerator" element={<UtmeAccelerator />} />
-                    <Route path="/applied-data-science" element={<DataScience />} />
-                    <Route path="/data-analytics-insights" element={<DataAnalytics />} />
-                    <Route path="/cloud-infrastructure-engineering" element={<CloudEngineering />} />
-                    <Route path="/cyber-defense-security" element={<CyberSecurity />} />
-                    <Route path="/full-stack-software-engineering" element={<SoftwareEngineering />} />
-                    <Route path="/pearson-vue" element={<PearsonVue />} />
-                    <Route path="/educational-consulting" element={<EduConsulting />} />
-                    <Route path="/educational-consulting/book-consultation" element={<ConsultationBooking />} />
-                    
-                    {/* Application Flow */}
-                    <Route path="/apply" element={<ApplicationEntry />} />
-                    <Route path="/apply/step-1" element={<ApplicationForm />} />
-                    <Route path="/apply/returning" element={<Navigate to="/student/transition-tech" replace />} />
-                    <Route path="/application" element={<ApplicationForm />} />
-                    
-                    <Route path="/exam-registration" element={<ExamRegistration />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/news" element={<NewsPage />} />
-                    <Route path="/news/:id" element={<NewsDetail />} />
-                    <Route path="/events" element={<EventsPage />} />
-                    <Route path="/events/:id" element={<EventDetail />} />
-                    
-                    {/* Program & Service Groupings */}
-                    <Route path="/programs" element={<ProgramsMainPage />} />
-                    <Route path="/programs/academics" element={<AcademicsPage />} />
-                    <Route path="/programs/ict" element={<IctPage />} />
-                    <Route path="/programs/tech-tracks" element={<TechTracks />} />
-                    <Route path="/programs/utme-accelerator" element={<UtmeAccelerator />} />
-                    <Route path="/programs/data-science" element={<DataScience />} />
-                    <Route path="/programs/data-analytics" element={<DataAnalytics />} />
-                    <Route path="/programs/software-engineering" element={<SoftwareEngineering />} />
-                    <Route path="/programs/cloud-engineering" element={<CloudEngineering />} />
-                    <Route path="/programs/cyber-security" element={<CyberSecurity />} />
-                    <Route path="/programs/:programId" element={<ProgramDetailPage />} />
-                    <Route path="/services" element={<ServicesMainPage />} />
-                    <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
-                </Route>
+        <A11yProvider>
+            <Router>
+                <Routes>
+                    <Route element={<MainLayout />}>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/admissions" element={<Admissions />} />
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/who-we-are" element={<VisionValues />} />
+                        <Route path="/leadership" element={<LeadershipTeam />} />
+                        <Route path="/innovation-lab" element={<InnovationLab />} />
+                        <Route path="/accreditations-partnerships" element={<Accreditations />} />
+                        <Route path="/careers" element={<Careers />} />
+                        <Route path="/ai-data-models" element={<AiDataModels />} />
+                        <Route path="/enterprise-consulting" element={<EnterpriseConsulting />} />
+                        <Route path="/student-showcase" element={<StudentShowcase />} />
+                        <Route path="/o-level-mastery" element={<OLevelMastery />} />
+                        <Route path="/a-level-excellence" element={<ALevelExcellence />} />
+                        <Route path="/utme-accelerator" element={<UtmeAccelerator />} />
+                        <Route path="/applied-data-science" element={<DataScience />} />
+                        <Route path="/data-analytics-insights" element={<DataAnalytics />} />
+                        <Route path="/cloud-infrastructure-engineering" element={<CloudEngineering />} />
+                        <Route path="/cyber-defense-security" element={<CyberSecurity />} />
+                        <Route path="/full-stack-software-engineering" element={<SoftwareEngineering />} />
+                        <Route path="/pearson-vue" element={<PearsonVue />} />
+                        <Route path="/educational-consulting" element={<EduConsulting />} />
+                        <Route path="/educational-consulting/book-consultation" element={<ConsultationBooking />} />
 
-                {/* STANDALONE AUTH ROUTES (NO LAYOUT WRAPPERS) */}
-                <Route path="/login/student" element={<StudentLogin />} />
-                <Route path="/login/staff" element={<StaffLogin />} />
+                        <Route path="/apply" element={<ApplicationEntry />} />
+                        <Route path="/apply/step-1" element={<ApplicationForm />} />
+                        <Route path="/apply/returning" element={<Navigate to="/student/transition-tech" replace />} />
+                        <Route path="/application" element={<ApplicationForm />} />
 
-                {/* PRIVATE PORTAL LAYOUT */}
-                <Route element={<PortalLayout />}>
-                    {/* Base redirect: /student goes to /student/dashboard */}
-                    <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
-                    
-                    {/* TODO: Wrap this PortalLayout group in a <ProtectedRoute> component later */}
-                    <Route path="/student/dashboard" element={<StudentDashboard />} />
-                    <Route path="/student/transcript" element={<StudentTranscript />} />
-                    <Route path="/student/courses" element={<StudentCourses />} />
-                    <Route path="/student/courses/:id" element={<CourseDetail />} />
-                    <Route path="/student/graduation" element={<GraduationHub />} />
-                    <Route path="/student/tuition" element={<StudentTuition />} />
-                    <Route path="/student/profile" element={<StudentProfile />} />
-                    <Route path="/student/calendar" element={<StudentCalendar />} />
-                    <Route path="/student/elibrary" element={<StudentLibrary />} />
-                    <Route path="/student/settings" element={<StudentSettings />} />
-                    
-                    {/* Track-Specific Conditional Pages */}
-                    <Route path="/student/university-admissions" element={<UniversityAdmissions />} />
-                    <Route path="/student/careers" element={<CareerGraduation />} />
-                    <Route path="/student/transition-tech" element={<TechTransitionForm />} />
-                </Route>
+                        <Route path="/exam-registration" element={<ExamRegistration />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="/news" element={<NewsPage />} />
+                        <Route path="/news/:id" element={<NewsDetail />} />
+                        <Route path="/events" element={<EventsPage />} />
+                        <Route path="/events/:id" element={<EventDetail />} />
 
-                {/* GLOBAL 404 (catch-all) */}
-                <Route path="*" element={<NotFound />} />
-            </Routes>
-        </Router>
+                        <Route path="/programs" element={<ProgramsMainPage />} />
+                        <Route path="/programs/academics" element={<AcademicsPage />} />
+                        <Route path="/programs/ict" element={<IctPage />} />
+                        <Route path="/programs/tech-tracks" element={<TechTracks />} />
+                        <Route path="/programs/utme-accelerator" element={<UtmeAccelerator />} />
+                        <Route path="/programs/data-science" element={<DataScience />} />
+                        <Route path="/programs/data-analytics" element={<DataAnalytics />} />
+                        <Route path="/programs/software-engineering" element={<SoftwareEngineering />} />
+                        <Route path="/programs/cloud-engineering" element={<CloudEngineering />} />
+                        <Route path="/programs/cyber-security" element={<CyberSecurity />} />
+                        <Route path="/programs/:programId" element={<ProgramDetailPage />} />
+                        <Route path="/services" element={<ServicesMainPage />} />
+                        <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
+                    </Route>
+
+                    <Route path="/login/student" element={<StudentLogin />} />
+                    <Route path="/login/staff" element={<StaffLogin />} />
+
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </Router>
+        </A11yProvider>
     )
 }
 

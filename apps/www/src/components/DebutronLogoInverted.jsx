@@ -1,0 +1,1 @@
+export { DebutronLogoInverted as default } from '@debutron/ui/sec'

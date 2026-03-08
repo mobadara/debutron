@@ -1,0 +1,16 @@
+{
+  "name": "@debutron/ui",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./sec": "./sec/index.js"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20",
+    "react-router-dom": ">=6 <8",
+    "react-icons": ">=4 <6"
+  }
+}

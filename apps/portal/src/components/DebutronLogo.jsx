@@ -1,0 +1,1 @@
+export { DebutronLogo as default } from '@debutron/ui/sec'
