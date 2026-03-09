@@ -119,7 +119,7 @@ function StudentDashboard() {
 
 						{isEligibleForTech ? (
 							<Link
-								to="/student/transition-tech"
+								to="/transition-tech"
 								className="bg-yellow-400 text-slate-900 font-bold px-8 py-4 inline-block"
 							>
 								Unlock Innovation Lab -&gt;

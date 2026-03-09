@@ -180,23 +180,23 @@ function GlobalSidebar({ activeTrack, setActiveTrack, activeProgram, setActivePr
 			</div>
 
 			<nav className="flex-1 px-4 mt-6 space-y-1 overflow-y-auto" aria-label="Main Portal Navigation">
-				<Link to="/student/dashboard" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/dashboard')}`}>
+				<Link to="/dashboard" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/dashboard')}`}>
 					<FiHome />
 					<span>Dashboard</span>
 				</Link>
-				<Link to="/student/courses" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/courses')}`}>
+				<Link to="/courses" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/courses')}`}>
 					<FiBook />
 					<span>Courses</span>
 				</Link>
-				<Link to="/student/transcript" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/transcript')}`}>
+				<Link to="/transcript" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/transcript')}`}>
 					<FiAward />
 					<span>Transcript</span>
 				</Link>
-				<Link to="/student/calendar" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/calendar')}`}>
+				<Link to="/calendar" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/calendar')}`}>
 					<FiCalendar />
 					<span>Calendar</span>
 				</Link>
-				<Link to="/student/tuition" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/tuition')}`}>
+				<Link to="/tuition" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/tuition')}`}>
 					<FiCreditCard className="text-lg" />
 					<span>Finance & Tuition</span>
 				</Link>
@@ -207,14 +207,14 @@ function GlobalSidebar({ activeTrack, setActiveTrack, activeProgram, setActivePr
 					</p>
 
 					{activeTrack === 'A' && (
-						<Link to="/student/university-admissions" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/university-admissions')}`}>
+						<Link to="/university-admissions" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/university-admissions')}`}>
 							<FiBookOpen />
 							<span>University Admissions</span>
 						</Link>
 					)}
 
 					{activeTrack === 'T' && (
-						<Link to="/student/careers" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/careers')}`}>
+						<Link to="/careers" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/careers')}`}>
 							<FiBriefcase />
 							<span>Career Hub</span>
 						</Link>
@@ -223,7 +223,7 @@ function GlobalSidebar({ activeTrack, setActiveTrack, activeProgram, setActivePr
 			</nav>
 
 			<div className="p-4 border-t border-slate-200 dark:border-slate-700">
-				<Link to="/student/settings" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/student/settings')}`}>
+				<Link to="/settings" onClick={() => setIsOpen(false)} className={`${navItemClass} ${focusRingClass} ${isActive('/settings')}`}>
 					<FiSettings />
 					<span><span className="sr-only">Open your profile and application </span>Settings</span>
 				</Link>

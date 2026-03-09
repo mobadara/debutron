@@ -22,32 +22,26 @@ function App() {
 	return (
 		<Router>
 			<Routes>
-				<Route path="/" element={<Navigate to="/student/dashboard" replace />} />
-				<Route path="/student" element={<PortalLayout />}>
-					<Route index element={<Navigate to="dashboard" replace />} />
-					<Route path="dashboard" element={<StudentDashboard />} />
-					<Route path="transcript" element={<StudentTranscript />} />
-					<Route path="courses" element={<StudentCourses />} />
-					<Route path="courses/:id" element={<CourseDetail />} />
-					<Route path="graduation" element={<GraduationHub />} />
-					<Route path="tuition" element={<StudentTuition />} />
-					<Route path="profile" element={<StudentProfile />} />
-					<Route path="calendar" element={<StudentCalendar />} />
-					<Route path="elibrary" element={<StudentLibrary />} />
-					<Route path="settings" element={<StudentSettings />} />
-					<Route path="university-admissions" element={<UniversityAdmissions />} />
-					<Route path="careers" element={<CareerGraduation />} />
-					<Route path="transition-tech" element={<TechTransitionForm />} />
+				<Route path="/" element={<Navigate to="/dashboard" replace />} />
+				<Route element={<PortalLayout />}>
+					<Route path="/dashboard" element={<StudentDashboard />} />
+					<Route path="/transcript" element={<StudentTranscript />} />
+					<Route path="/courses" element={<StudentCourses />} />
+					<Route path="/courses/:id" element={<CourseDetail />} />
+					<Route path="/graduation" element={<GraduationHub />} />
+					<Route path="/tuition" element={<StudentTuition />} />
+					<Route path="/profile" element={<StudentProfile />} />
+					<Route path="/calendar" element={<StudentCalendar />} />
+					<Route path="/elibrary" element={<StudentLibrary />} />
+					<Route path="/settings" element={<StudentSettings />} />
+					<Route path="/university-admissions" element={<UniversityAdmissions />} />
+					<Route path="/careers" element={<CareerGraduation />} />
+					<Route path="/transition-tech" element={<TechTransitionForm />} />
 				</Route>
-				<Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />
-				<Route path="/courses" element={<Navigate to="/student/courses" replace />} />
-				<Route path="/transcript" element={<Navigate to="/student/transcript" replace />} />
-				<Route path="/calendar" element={<Navigate to="/student/calendar" replace />} />
-				<Route path="/tuition" element={<Navigate to="/student/tuition" replace />} />
-				<Route path="/settings" element={<Navigate to="/student/settings" replace />} />
+				<Route path="/student/*" element={<Navigate to="/dashboard" replace />} />
 				<Route path="/login/student" element={<StudentLogin />} />
 				<Route path="/login/staff" element={<StaffLogin />} />
-				<Route path="*" element={<Navigate to="/student/dashboard" replace />} />
+				<Route path="*" element={<Navigate to="/dashboard" replace />} />
 			</Routes>
 		</Router>
 	)

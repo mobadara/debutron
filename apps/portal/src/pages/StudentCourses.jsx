@@ -36,7 +36,7 @@ export default function StudentCourses() {
             <p className="text-sm text-slate-600 mb-5">Instructor: {item.instructor}</p>
 
             <Link
-              to={`/student/courses/${item.id}`}
+              to={`/courses/${item.id}`}
               className="block w-full text-center bg-slate-900 text-white py-3 px-4 font-bold text-sm md:text-base hover:bg-blue-700 transition-colors rounded-sm"
             >
               Go to {activeTrack === 'A' ? 'Course Space' : 'Module Space'}
