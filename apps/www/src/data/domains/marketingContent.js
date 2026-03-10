@@ -1,5 +1,21 @@
 import { normalizeLinkItems, toSlug, withContentFields } from '../utils/normalize'
 
+const toAbsoluteUrl = (value, fallback) => {
+	const base = (value || fallback || '').trim()
+	if (!base) {
+		return ''
+	}
+
+	if (/^https?:\/\//i.test(base)) {
+		return base.replace(/\/$/, '')
+	}
+
+	return `https://${base.replace(/\/$/, '')}`
+}
+
+const portalBaseUrl = toAbsoluteUrl(import.meta.env.VITE_PORTAL_URL, 'http://localhost:5175')
+const staffBaseUrl = toAbsoluteUrl(import.meta.env.VITE_STAFF_URL, 'http://localhost:5174')
+
 export const carouselSlides = [
 	{
 		id: 'hero-1',
@@ -397,8 +413,8 @@ export const topUtilityData = {
 	type: 'navigation-meta',
 	applyNow: { label: 'Apply Now', to: '/admissions' },
 	portals: [
-		{ label: 'Student Login', href: `${import.meta.env.VITE_PORTAL_URL}/login`, newTab: true },
-		{ label: 'Staff Login', href: `${import.meta.env.VITE_STAFF_URL}/login`, newTab: true },
+		{ label: 'Student Login', href: `${portalBaseUrl}/login`, newTab: true },
+		{ label: 'Staff Login', href: `${staffBaseUrl}/login`, newTab: true },
 	],
 	staffMail: {
 		label: 'Staff Mail',
