@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { FiHome } from 'react-icons/fi'
+import DebutronLogo from '../components/DebutronLogo'
 
 const FieldLabel = ({ text }) => (
 	<label className="mb-1 block font-sans text-sm font-bold text-debutron-navy">{text}</label>
@@ -19,6 +20,9 @@ function StaffLogin() {
 			<div className="w-full max-w-md mx-auto px-6">
 				<div className="bg-white shadow-md rounded-lg overflow-hidden border-t-4 border-debutron-navy">
 					<div className="px-6 py-8">
+						<div className="mb-6 flex justify-center">
+							<DebutronLogo />
+						</div>
 						<h1 className="mb-8 text-center font-serif text-2xl font-bold text-debutron-navy">Faculty &amp; Admin Portal</h1>
 
 						<form>

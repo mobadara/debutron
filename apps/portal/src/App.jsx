@@ -22,7 +22,8 @@ function App() {
 	return (
 		<Router>
 			<Routes>
-				<Route path="/" element={<Navigate to="/dashboard" replace />} />
+				<Route path="/" element={<Navigate to="/login" replace />} />
+				<Route path="/login" element={<StudentLogin />} />
 				<Route element={<PortalLayout />}>
 					<Route path="/dashboard" element={<StudentDashboard />} />
 					<Route path="/transcript" element={<StudentTranscript />} />
@@ -39,9 +40,9 @@ function App() {
 					<Route path="/transition-tech" element={<TechTransitionForm />} />
 				</Route>
 				<Route path="/student/*" element={<Navigate to="/dashboard" replace />} />
-				<Route path="/login/student" element={<StudentLogin />} />
+				<Route path="/login/student" element={<Navigate to="/login" replace />} />
 				<Route path="/login/staff" element={<StaffLogin />} />
-				<Route path="*" element={<Navigate to="/dashboard" replace />} />
+				<Route path="*" element={<Navigate to="/login" replace />} />
 			</Routes>
 		</Router>
 	)

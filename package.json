@@ -7,12 +7,13 @@
   ],
   "scripts": {
     "dev": "npm run dev:all",
-    "dev:all": "concurrently -n www,portal,lms,library -c blue,green,magenta,cyan \"npm run dev:www\" \"npm run dev:portal\" \"npm run dev:lms\" \"npm run dev:library\"",
+    "dev:all": "concurrently -n www,portal,lms,library,staff -c blue,green,magenta,cyan,yellow \"npm run dev:www\" \"npm run dev:portal\" \"npm run dev:lms\" \"npm run dev:library\" \"npm run dev:staff\"",
     "dev:workspaces": "npm run dev --workspaces --if-present",
     "dev:www": "npm run dev -w @debutron/www",
     "dev:portal": "npm run dev -w @debutron/portal",
     "dev:lms": "npm run dev -w @debutron/lms",
     "dev:library": "npm run dev -w @debutron/library",
+    "dev:staff": "npm run dev -w @debutron/staff",
     "build": "npm run build --workspaces --if-present",
     "install:all": "npm install"
   },

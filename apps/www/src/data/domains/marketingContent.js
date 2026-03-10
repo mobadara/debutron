@@ -397,8 +397,8 @@ export const topUtilityData = {
 	type: 'navigation-meta',
 	applyNow: { label: 'Apply Now', to: '/admissions' },
 	portals: [
-		{ label: 'Student', to: '/login/student' },
-		{ label: 'Staff', to: '/login/staff' },
+		{ label: 'Student Login', href: 'http://localhost:5175/login', newTab: true },
+		{ label: 'Staff Login', href: 'http://localhost:5174/login', newTab: true },
 	],
 	staffMail: {
 		label: 'Staff Mail',

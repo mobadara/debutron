@@ -1,62 +1,99 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { FiHome } from 'react-icons/fi'
-
-const FieldLabel = ({ text }) => (
-	<label className="mb-1 block font-sans text-sm font-bold text-debutron-navy">{text}</label>
-)
+import { useNavigate } from 'react-router-dom'
+import DebutronLogoInverted from '../components/DebutronLogoInverted'
 
 function StudentLogin() {
+	const navigate = useNavigate()
+
+	const handleSubmit = (event) => {
+		event.preventDefault()
+		navigate('/dashboard')
+	}
+
 	return (
-		<main className="min-h-screen bg-gray-50 relative flex items-center justify-center">
-			<Link
-				to="/"
-				className="absolute top-8 left-8 flex items-center gap-2 text-gray-500 hover:text-debutron-navy transition-colors font-sans font-bold text-lg"
-			>
-				<FiHome className="w-6 h-6" /> Return to Homepage
-			</Link>
+		<div className="min-h-screen flex bg-white dark:bg-slate-950">
+			<aside className="hidden lg:flex w-1/2 bg-slate-900 text-white p-12 flex-col justify-between relative overflow-hidden">
+				<div
+					className="absolute inset-0 opacity-30"
+					aria-hidden="true"
+					style={{
+						backgroundImage:
+							'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.22), transparent 40%), radial-gradient(circle at 80% 80%, rgba(148, 163, 184, 0.18), transparent 45%), linear-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.14) 1px, transparent 1px)',
+						backgroundSize: '100% 100%, 100% 100%, 36px 36px, 36px 36px',
+					}}
+				/>
 
-			<div className="w-full max-w-md mx-auto px-6">
-				<div className="bg-white shadow-md rounded-lg overflow-hidden">
-					<div className="px-6 py-8">
-						<h1 className="mb-2 text-center font-serif text-2xl font-bold text-debutron-navy">Student Portal</h1>
-						<p className="mb-8 text-center font-sans text-sm text-gray-500">
-							Sign in to access your digital campus, AI analytics, and coursework.
-						</p>
+				<div className="relative z-10">
+					<DebutronLogoInverted />
+				</div>
 
-						<form>
-							<div className="mb-4">
-								<FieldLabel text="Student ID" />
-								<input
-									type="text"
-									placeholder="000001"
-									className="w-full rounded-sm border border-gray-300 p-3 font-sans outline-none focus:border-debutron-navy focus:ring-1 focus:ring-debutron-navy"
-								/>
-							</div>
+				<div className="relative z-10 max-w-md space-y-4">
+					<h1 className="text-4xl xl:text-5xl font-bold leading-tight">Welcome to your digital campus.</h1>
+					<p className="text-lg text-slate-300">
+						Access your workspace, track your progress, and continue your journey.
+					</p>
+				</div>
 
-							<div>
-								<FieldLabel text="Password" />
-								<input
-									type="password"
-									className="w-full rounded-sm border border-gray-300 p-3 font-sans outline-none focus:border-debutron-navy focus:ring-1 focus:ring-debutron-navy"
-								/>
-							</div>
+				<div className="relative z-10" />
+			</aside>
 
-							<button
-								type="submit"
-								className="mt-6 w-full rounded-sm bg-debutron-navy py-3 font-sans font-bold text-white"
+			<main className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12">
+				<div className="max-w-md w-full">
+					<h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Sign in to Portal</h2>
+					<p className="text-slate-500 mb-8">Enter your Student ID and password to continue.</p>
+
+					<form onSubmit={handleSubmit} className="space-y-6">
+						<div>
+							<label
+								htmlFor="student-identifier"
+								className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
 							>
-								Login to Portal
-							</button>
-						</form>
+								Student ID or Email
+							</label>
+							<input
+								id="student-identifier"
+								type="text"
+								autoComplete="username"
+								required
+								className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-600 outline-none"
+								placeholder="e.g. STU-4021 or student@debutron.org"
+							/>
+						</div>
 
-						<a href="#" className="mt-4 block text-center text-sm text-blue-600 hover:underline">
-							Forgot Student ID or Password?
+						<div>
+							<div className="mb-2 flex items-center justify-between">
+								<label htmlFor="password" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+									Password
+								</label>
+								<a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+									Forgot password?
+								</a>
+							</div>
+							<input
+								id="password"
+								type="password"
+								autoComplete="current-password"
+								required
+								className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-600 outline-none"
+								placeholder="Enter your password"
+							/>
+						</div>
+
+						<button
+							type="submit"
+							className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md transition-colors mt-6"
+						>
+							Sign In
+						</button>
+					</form>
+
+					<div className="mt-8 text-center">
+						<a href="#" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600">
+							Need help? Contact Admissions.
 						</a>
 					</div>
 				</div>
-			</div>
-		</main>
+			</main>
+		</div>
 	)
 }
 

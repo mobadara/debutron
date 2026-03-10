@@ -99,7 +99,7 @@ function App() {
                     <Route path="/educational-consulting/book-consultation" element={<ConsultationBooking />} />
                     <Route path="/apply" element={<ApplicationEntry />} />
                     <Route path="/apply/step-1" element={<ApplicationForm />} />
-                    <Route path="/apply/returning" element={<Navigate to="/login/student" replace />} />
+                    <Route path="/apply/returning" element={<Navigate to="/login" replace />} />
                     <Route path="/application" element={<ApplicationForm />} />
                     <Route path="/exam-registration" element={<ExamRegistration />} />
                     <Route path="/contact" element={<Contact />} />
@@ -121,7 +121,8 @@ function App() {
                     <Route path="/services" element={<ServicesMainPage />} />
                     <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
                 </Route>
-                <Route path="/login/student" element={<StudentLogin />} />
+                <Route path="/login" element={<StudentLogin />} />
+                <Route path="/login/student" element={<Navigate to="/login" replace />} />
                 <Route path="/login/staff" element={<StaffLogin />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
