@@ -40,6 +40,7 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
 
   // Mobile Pairing State
   const [isMobilePaired, setIsMobilePaired] = useState(false);
+  const [releaseStatus, setReleaseStatus] = useState({ released: false, reason: '' });
 
   const isMobileDevice = useMemo(() => {
     if (typeof window === 'undefined') {
@@ -66,13 +67,18 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
 
   const MAX_WARNINGS = 3;
 
-  const releaseMediaStreams = useCallback(() => {
+  const releaseMediaStreams = useCallback((options = {}) => {
+    const { announce = false, reason = '' } = options;
+    let hadActiveStream = false;
+
     if (streamRef.current) {
+      hadActiveStream = true;
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
 
     if (mobileStreamRef.current) {
+      hadActiveStream = true;
       mobileStreamRef.current.getTracks().forEach((track) => track.stop());
       mobileStreamRef.current = null;
     }
@@ -86,6 +92,9 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
     }
 
     setIsMobilePaired(false);
+    if (announce && hadActiveStream) {
+      setReleaseStatus({ released: true, reason });
+    }
   }, []);
 
   const playWarningSound = () => {
@@ -113,7 +122,7 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
   };
 
   const submitQuiz = useCallback(() => {
-    releaseMediaStreams();
+    releaseMediaStreams({ announce: true, reason: 'submitted' });
     let calculatedScore = 0;
     quizData.questions.forEach(q => {
       if (q.type === 'mcq' && answers[q.id] === q.correctAnswer) {
@@ -160,7 +169,7 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
           const newWarnings = prev + 1;
           if (newWarnings >= MAX_WARNINGS) {
             setStatus('terminated');
-            releaseMediaStreams();
+            releaseMediaStreams({ announce: true, reason: 'terminated' });
             if (onTerminate) onTerminate();
           } else {
             playWarningSound();
@@ -255,6 +264,7 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
           onCancel={() => setShowInstructionModal(false)}
           onConfirm={() => {
             setShowInstructionModal(false);
+            setReleaseStatus({ released: false, reason: '' });
             if (onStart) onStart();
             setStatus('in-progress');
           }}
@@ -297,8 +307,29 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
     );
   }
 
-  if (status === 'terminated') return ( <div className="p-20 text-center"><h2 className="text-3xl font-bold text-rose-500 mb-4">Exam Terminated</h2><p className="text-slate-500">You violated the tab policy.</p></div> );
-  if (status === 'completed') return ( <div className="p-20 text-center"><h2 className="text-3xl font-bold text-emerald-500 mb-4">Exam Submitted</h2><p className="text-slate-500">Your video is being processed.</p></div> );
+  if (status === 'terminated') return (
+    <div className="p-20 text-center">
+      <h2 className="text-3xl font-bold text-rose-500 mb-4">Exam Terminated</h2>
+      <p className="text-slate-500">You violated the tab policy.</p>
+      {releaseStatus.released && (
+        <div className="mt-6 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-900/40 dark:text-emerald-300">
+          <FiCheckCircle /> Camera and microphone have been released for other applications.
+        </div>
+      )}
+    </div>
+  );
+
+  if (status === 'completed') return (
+    <div className="p-20 text-center">
+      <h2 className="text-3xl font-bold text-emerald-500 mb-4">Exam Submitted</h2>
+      <p className="text-slate-500">Your video is being processed.</p>
+      {releaseStatus.released && (
+        <div className="mt-6 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-900/40 dark:text-emerald-300">
+          <FiCheckCircle /> Camera and microphone have been released for other applications.
+        </div>
+      )}
+    </div>
+  );
 
   // --- In Progress Render (Side-by-Side Layout) ---
   return (
