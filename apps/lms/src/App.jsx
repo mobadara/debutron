@@ -1,3 +1,4 @@
+import 'katex/dist/katex.min.css';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { A11yProvider } from '@debutron/ui'
 
@@ -6,6 +7,9 @@ import LMSLogin from './pages/LMSLogin'
 import LMSLayout from './components/layout/LMSLayout'
 import CourseSidebar from './components/course/CourseSidebar'
 import LessonViewer from './pages/LessonViewer'
+import GlobalForum from './pages/GlobalForum'
+import ForumNewDiscussion from './pages/ForumNewDiscussion'
+import DiscussionView from './pages/DiscussionView'
 
 const PROGRAM_SIDEBAR_CONFIG = {
   p1: { courseTitle: 'Data Science & AI', trackType: 'T' },
@@ -54,6 +58,9 @@ function App() {
           {/* 4. The Authenticated App Layout */}
           <Route path="/" element={<LMSLayout />}>
             <Route path="dashboard" element={<LMSDashboard />} />
+            <Route path="forums/global" element={<GlobalForum />} />
+            <Route path="forums/discussion/:postId" element={<DiscussionView />} />
+            <Route path="forums/global/new" element={<ForumNewDiscussion />} />
             
             <Route path="course/*" element={
               <div className="flex w-full h-[calc(100vh-64px)]"> 

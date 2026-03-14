@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FiBell, FiChevronDown, FiLogOut } from 'react-icons/fi'
 
@@ -34,6 +34,8 @@ const mockUser = {
 export default function LMSHeader() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
+  const notificationRef = useRef(null)
+  const profileRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -41,13 +43,13 @@ export default function LMSHeader() {
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'My Courses', path: '/courses' },
     { label: 'eLibrary', path: import.meta.env.VITE_LIBRARY_URL || '#' },
-    { label: 'Global Forums', path: '/forums' },
+    { label: 'Global Forums', path: '/forums/global' },
   ]
 
   const isActive = (path) => location.pathname === path
 
   const handleNavClick = (path) => {
-    if (path.startsWith('http') || path.startsWith('http')) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
       window.open(path, '_blank')
     } else {
       navigate(path)
@@ -58,6 +60,37 @@ export default function LMSHeader() {
     // Placeholder for logout logic
     navigate('/')
   }
+
+  useEffect(() => {
+    if (!dropdownOpen && !notificationOpen) {
+      return
+    }
+
+    const handlePointerDown = (event) => {
+      const clickedInsideNotification = notificationRef.current?.contains(event.target)
+      const clickedInsideProfile = profileRef.current?.contains(event.target)
+
+      if (!clickedInsideNotification && !clickedInsideProfile) {
+        setDropdownOpen(false)
+        setNotificationOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setDropdownOpen(false)
+        setNotificationOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [dropdownOpen, notificationOpen])
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
@@ -72,6 +105,7 @@ export default function LMSHeader() {
             {navLinks.map((link) => (
               <button
                 key={link.label}
+                type="button"
                 onClick={() => handleNavClick(link.path)}
                 className={`text-sm font-medium transition-colors whitespace-nowrap ${
                   isActive(link.path)
@@ -89,9 +123,13 @@ export default function LMSHeader() {
         {/* Right Side: Notifications & User Menu */}
         <div className="flex items-center gap-4">
           {/* Notification Bell */}
-          <div className="relative">
+          <div ref={notificationRef} className="relative">
             <button
-              onClick={() => setNotificationOpen(!notificationOpen)}
+              type="button"
+              onClick={() => {
+                setNotificationOpen((previous) => !previous)
+                setDropdownOpen(false)
+              }}
               className="relative p-2 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
               aria-label="Notifications"
               aria-expanded={notificationOpen}
@@ -110,7 +148,7 @@ export default function LMSHeader() {
                   </h3>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
-                  <button className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  <button type="button" className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                     <p className="text-xs font-medium text-slate-900 dark:text-white">
                       Assignment Due Soon
                     </p>
@@ -118,7 +156,7 @@ export default function LMSHeader() {
                       Data Science Project due in 2 days
                     </p>
                   </button>
-                  <button className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-t border-slate-200 dark:border-slate-700">
+                  <button type="button" className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-t border-slate-200 dark:border-slate-700">
                     <p className="text-xs font-medium text-slate-900 dark:text-white">
                       Grade Posted
                     </p>
@@ -132,9 +170,13 @@ export default function LMSHeader() {
           </div>
 
           {/* User Profile Dropdown */}
-          <div className="relative">
+          <div ref={profileRef} className="relative">
             <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
+              type="button"
+              onClick={() => {
+                setDropdownOpen((previous) => !previous)
+                setNotificationOpen(false)
+              }}
               className="flex items-center gap-2 px-2 py-1 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
               aria-label={`User menu for ${mockUser.name}`}
               aria-expanded={dropdownOpen}
@@ -159,6 +201,7 @@ export default function LMSHeader() {
                 role="menu"
               >
                 <button
+                  type="button"
                   onClick={() => navigate('/profile')}
                   className="w-full text-left px-4 py-2 text-sm text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                   role="menuitem"
@@ -166,6 +209,7 @@ export default function LMSHeader() {
                   My Profile
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/settings')}
                   className="w-full text-left px-4 py-2 text-sm text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                   role="menuitem"
@@ -173,6 +217,7 @@ export default function LMSHeader() {
                   Settings
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/help')}
                   className="w-full text-left px-4 py-2 text-sm text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-t border-slate-200 dark:border-slate-700"
                   role="menuitem"
@@ -180,6 +225,7 @@ export default function LMSHeader() {
                   Help Center
                 </button>
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2 mt-2 border-t border-slate-200 dark:border-slate-700"
                   role="menuitem"
@@ -193,6 +239,7 @@ export default function LMSHeader() {
 
           {/* Logout Button (Mobile Visible) */}
           <button
+            type="button"
             onClick={handleLogout}
             className="md:hidden text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1 transition-colors"
             aria-label="Logout"

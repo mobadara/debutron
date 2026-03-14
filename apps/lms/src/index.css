@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure block-level LaTeX equations can scroll horizontally if they are too wide */
+.katex-display {
+  @apply overflow-x-auto overflow-y-hidden py-2;
+}
+
 /* Custom React Calendar Overrides for Debutron Lab */
 .react-calendar {
   @apply w-full bg-transparent border-none font-sans;
