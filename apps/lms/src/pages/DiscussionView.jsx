@@ -10,6 +10,30 @@ import {
 } from 'react-icons/fi';
 import 'katex/dist/katex.min.css';
 
+function AudioControls({ id, text, readingId, isReadingPaused, onPlay, onPause, onStop }) {
+  const isPlayingThis = readingId === id && !isReadingPaused;
+  const isPausedOnThis = readingId === id && isReadingPaused;
+
+  return (
+    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-full px-2 py-1 shadow-inner">
+      {isPlayingThis ? (
+        <button onClick={onPause} className="p-1.5 text-[#000080] dark:text-[#0D9488] hover:text-blue-800 transition-colors" title="Pause Reading">
+          <FiPauseCircle size={18} />
+        </button>
+      ) : (
+        <button onClick={() => onPlay(id, text)} className="p-1.5 text-slate-500 hover:text-[#000080] dark:hover:text-[#0D9488] transition-colors" title={isPausedOnThis ? "Resume Reading" : "Read Aloud"}>
+          <FiPlayCircle size={18} />
+        </button>
+      )}
+      {(isPlayingThis || isPausedOnThis) && (
+        <button onClick={onStop} className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors animate-in fade-in zoom-in duration-200" title="Stop Reading">
+          <FiStopCircle size={18} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function DiscussionView() {
   const { postId } = useParams();
   const [copiedLink, setCopiedLink] = useState(false);
@@ -71,7 +95,7 @@ export default function DiscussionView() {
     }
   };
 
-  const handleReport = (type, id) => {
+  const handleReport = (type) => {
     alert(`Flagged ${type} for review by campus moderation.`);
   };
 
@@ -177,31 +201,6 @@ export default function DiscussionView() {
     setIsReadingPaused(false);
   };
 
-  const AudioControls = ({ id, text }) => {
-    const isPlayingThis = readingId === id && !isReadingPaused;
-    const isPausedOnThis = readingId === id && isReadingPaused;
-
-    return (
-      <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-full px-2 py-1 shadow-inner">
-        {isPlayingThis ? (
-          <button onClick={pauseTTS} className="p-1.5 text-[#000080] dark:text-[#0D9488] hover:text-blue-800 transition-colors" title="Pause Reading">
-            <FiPauseCircle size={18} />
-          </button>
-        ) : (
-          <button onClick={() => playTTS(id, text)} className="p-1.5 text-slate-500 hover:text-[#000080] dark:hover:text-[#0D9488] transition-colors" title={isPausedOnThis ? "Resume Reading" : "Read Aloud"}>
-            <FiPlayCircle size={18} />
-          </button>
-        )}
-        
-        {(isPlayingThis || isPausedOnThis) && (
-          <button onClick={stopTTS} className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors animate-in fade-in zoom-in duration-200" title="Stop Reading">
-            <FiStopCircle size={18} />
-          </button>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="flex-1 w-full flex flex-col bg-slate-50 dark:bg-slate-950">
       
@@ -249,7 +248,15 @@ export default function DiscussionView() {
 
               {/* Action Bar (Hidden on Print) */}
               <div className="print-hide flex items-center gap-1 sm:gap-2 border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-100 dark:border-slate-800">
-                <AudioControls id="post" text={post.content} />
+                <AudioControls
+                  id="post"
+                  text={post.content}
+                  readingId={readingId}
+                  isReadingPaused={isReadingPaused}
+                  onPlay={playTTS}
+                  onPause={pauseTTS}
+                  onStop={stopTTS}
+                />
                 <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
                 
                 <button onClick={() => window.print()} className="p-2 text-slate-500 hover:text-[#000080] dark:hover:text-[#0D9488] transition-colors" title="Print Academic Document">
@@ -261,7 +268,7 @@ export default function DiscussionView() {
                 <button onClick={handleShareLink} className="p-2 text-slate-500 hover:text-[#000080] dark:hover:text-[#0D9488] transition-colors" title="Copy Permalink">
                   {copiedLink ? <FiCheck className="text-emerald-600" /> : <FiShare2 size={18} />}
                 </button>
-                <button onClick={() => handleReport('Post', post.id)} className="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Report Post">
+                <button onClick={() => handleReport('Post')} className="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Report Post">
                   <FiFlag size={18} />
                 </button>
               </div>
@@ -302,8 +309,16 @@ export default function DiscussionView() {
                     </div>
                     
                     <div className="flex items-center gap-1 print-hide">
-                      <AudioControls id={`comment-${comment.id}`} text={comment.content} />
-                      <button onClick={() => handleReport('Comment', comment.id)} className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors ml-1" title="Report Comment">
+                      <AudioControls
+                        id={`comment-${comment.id}`}
+                        text={comment.content}
+                        readingId={readingId}
+                        isReadingPaused={isReadingPaused}
+                        onPlay={playTTS}
+                        onPause={pauseTTS}
+                        onStop={stopTTS}
+                      />
+                      <button onClick={() => handleReport('Comment')} className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors ml-1" title="Report Comment">
                         <FiFlag size={14} />
                       </button>
                     </div>
