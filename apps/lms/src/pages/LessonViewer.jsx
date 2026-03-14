@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -10,6 +10,9 @@ import {
 } from 'react-icons/fi';
 import 'katex/dist/katex.min.css';
 import { getCourseById, getLessonById } from '../data/courses';
+import { formatRelativeTimestamp, getLessonProgress, getQuizAttempt, getResolvedCourse, getResolvedLesson, saveLessonProgress } from '../data/lmsProgress';
+
+import QuizEngine from '../components/course/QuizEngine';
 
 const ITEM_TYPE_ICONS = {
   video: FiVideo,
@@ -22,16 +25,53 @@ const ITEM_TYPE_ICONS = {
   resources: FiPaperclip,
 };
 
+
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams();
+  const [isTesting, setIsTesting] = useState(false);
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const course = getCourseById(courseId);
-  const lessonData = getLessonById(courseId, lessonId);
+  const baseCourse = getCourseById(courseId);
+  const baseLesson = getLessonById(courseId, lessonId);
+  const [lessonProgress, setLessonProgress] = useState(() => getLessonProgress(courseId, lessonId));
+
+  useEffect(() => {
+    setLessonProgress(getLessonProgress(courseId, lessonId));
+  }, [courseId, lessonId]);
+
+  const course = useMemo(
+    () => (baseCourse ? getResolvedCourse(baseCourse) : null),
+    [baseCourse]
+  );
+
+  const lessonData = useMemo(
+    () => (baseLesson ? getResolvedLesson(courseId, baseLesson, lessonProgress) : null),
+    [baseLesson, courseId, lessonProgress]
+  );
+
   const defaultItemId = lessonData?.items.find((item) => !item.locked)?.id || lessonData?.items?.[0]?.id;
   const activeItemId = searchParams.get('item') || defaultItemId;
-  const [completedItems, setCompletedItems] = useState(defaultItemId ? [defaultItemId] : []);
   const activeItem = lessonData?.items.find((item) => item.id === activeItemId) || lessonData?.items?.[0];
+  const completedItems = lessonProgress.completedItemIds;
   const isCompleted = completedItems.includes(activeItemId);
+
+  useEffect(() => {
+    if (activeItem?.type !== 'practice' && activeItem?.type !== 'graded') {
+      setIsTesting(false);
+    }
+  }, [activeItem]);
+
+  useEffect(() => {
+    if (!searchParams.get('item') && defaultItemId) {
+      setSearchParams({ item: defaultItemId }, { replace: true });
+    }
+  }, [defaultItemId, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (activeItem?.locked && defaultItemId && activeItem.id !== defaultItemId) {
+      setSearchParams({ item: defaultItemId }, { replace: true });
+    }
+  }, [activeItem, defaultItemId, setSearchParams]);
 
   if (!course || !lessonData || !activeItem) {
     return (
@@ -47,18 +87,51 @@ export default function LessonViewer() {
     );
   }
 
+  const persistLessonProgress = (updater) => {
+    setLessonProgress((previousProgress) => {
+      const nextProgress = typeof updater === 'function' ? updater(previousProgress) : updater;
+      return saveLessonProgress(courseId, lessonId, nextProgress);
+    });
+  };
+
   const toggleCompletion = () => {
-    if (isCompleted) {
-      setCompletedItems(prev => prev.filter(id => id !== activeItemId));
-    } else {
-      setCompletedItems(prev => [...prev, activeItemId]);
+    persistLessonProgress((previousProgress) => ({
+      ...previousProgress,
+      completedItemIds: previousProgress.completedItemIds.includes(activeItemId)
+        ? previousProgress.completedItemIds.filter((id) => id !== activeItemId)
+        : [...previousProgress.completedItemIds, activeItemId],
+    }));
+  };
+
+  const flattenedCourseItems = course.lessons.flatMap((lesson) =>
+    lesson.items.map((item) => ({
+      lessonId: lesson.id,
+      itemId: item.id,
+      locked: item.locked,
+    }))
+  );
+
+  const currentFlatIndex = flattenedCourseItems.findIndex(
+    (item) => item.lessonId === lessonId && item.itemId === activeItemId
+  );
+
+  const nextModule = currentFlatIndex >= 0
+    ? flattenedCourseItems.slice(currentFlatIndex + 1).find((item) => !item.locked)
+    : null;
+
+  const handleMoveToNextModule = () => {
+    if (!nextModule) {
+      navigate(`/course/${courseId}/home`);
+      return;
     }
+
+    navigate(`/course/${courseId}/lesson/${nextModule.lessonId}?item=${nextModule.itemId}`);
   };
 
   // Dynamic Content Renderer
   const renderContent = () => {
     switch (activeItem.type) {
-      case 'video':
+      case 'video': {
         const videoData = activeItem.content;
         return (
           <div className="flex flex-col gap-6 animate-in fade-in duration-300">
@@ -74,8 +147,9 @@ export default function LessonViewer() {
             </div>
           </div>
         );
+      }
 
-      case 'reading':
+      case 'reading': {
         const readData = activeItem.content;
         return (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 lg:p-12 shadow-sm animate-in fade-in duration-300">
@@ -86,13 +160,58 @@ export default function LessonViewer() {
             </div>
           </div>
         );
+      }
 
       case 'practice':
-      case 'graded':
+      case 'graded': {
+        const quizPayload = activeItem.content?.quizData;
+
+        if (!quizPayload) {
+          return <p className="text-slate-500">Quiz content is not available for this module yet.</p>;
+        }
+        
+        return (
+          <div className="w-full h-full max-w-4xl mx-auto py-6">
+            <QuizEngine 
+              key={activeItem.id}
+              quizData={quizPayload} 
+              onStart={() => setIsTesting(true)}
+              onComplete={(score) => {
+                setIsTesting(false);
+                persistLessonProgress((previousProgress) => ({
+                  ...previousProgress,
+                  completedItemIds: previousProgress.completedItemIds.includes(activeItem.id)
+                    ? previousProgress.completedItemIds
+                    : [...previousProgress.completedItemIds, activeItem.id],
+                  quizAttempts: {
+                    ...previousProgress.quizAttempts,
+                    [activeItem.id]: {
+                      score,
+                      totalPoints: quizPayload.questions
+                        .filter((question) => question.type === 'mcq')
+                        .reduce((sum, question) => sum + question.points, 0),
+                      status: 'completed',
+                      passed:
+                        score >=
+                        quizPayload.questions
+                          .filter((question) => question.type === 'mcq')
+                          .reduce((sum, question) => sum + question.points, 0) * 0.7,
+                      title: activeItem.title,
+                      completedAt: new Date().toISOString(),
+                    },
+                  },
+                }));
+              }} 
+              onReturn={() => navigate(`/course/${courseId}/home`)}
+            />
+          </div>
+        );
+      }
+
       case 'discussion':
       case 'assignment':
       case 'notes':
-      case 'resources':
+      case 'resources': {
         const ActiveItemIcon = ITEM_TYPE_ICONS[activeItem.type] || FiFileText;
         return (
           <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-300">
@@ -106,6 +225,7 @@ export default function LessonViewer() {
             </button>
           </div>
         );
+      }
 
       default:
         return <p className="text-slate-500">Content module in development.</p>;
@@ -131,7 +251,7 @@ export default function LessonViewer() {
       <div className="flex flex-1 overflow-hidden">
         
         {/* Left Sidebar: Lesson Table of Contents */}
-        <aside className="hidden lg:flex flex-col w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 overflow-y-auto">
+        <aside className={`hidden ${isTesting ? '' : 'lg:flex'} flex-col w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 overflow-y-auto`}>
           <div className="p-6 border-b border-slate-200 dark:border-slate-800">
             <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-sm">Lesson Modules</h3>
             <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-4">
@@ -145,6 +265,22 @@ export default function LessonViewer() {
               const isActive = activeItemId === item.id;
               const isItemCompleted = completedItems.includes(item.id);
               const ItemIcon = ITEM_TYPE_ICONS[item.type] || FiFileText;
+              const quizAttempt = item.type === 'practice' || item.type === 'graded'
+                ? getQuizAttempt(courseId, lessonId, item.id)
+                : null;
+              const quizPassed = Boolean(quizAttempt?.passed);
+              const quizTerminated = quizAttempt?.status === 'terminated';
+              const quizAttemptTime = formatRelativeTimestamp(quizAttempt?.completedAt);
+              const quizStatusText = quizAttempt
+                ? quizTerminated
+                  ? 'Attempt terminated'
+                  : quizPassed
+                    ? `Passed • ${quizAttempt.score}/${quizAttempt.totalPoints}`
+                    : `Completed • ${quizAttempt.score}/${quizAttempt.totalPoints}`
+                : null;
+              const quizMetaText = quizStatusText && quizAttemptTime
+                ? `${quizStatusText} • ${quizAttemptTime}`
+                : quizStatusText;
               
               return (
                 <button
@@ -166,6 +302,11 @@ export default function LessonViewer() {
                     <h4 className={`text-sm font-bold leading-tight mb-1 ${isActive ? 'text-[#000080] dark:text-[#0D9488]' : 'text-slate-700 dark:text-slate-300'}`}>
                       {item.title}
                     </h4>
+                    {quizStatusText && (
+                      <p className={`text-xs mb-1 font-semibold ${quizTerminated ? 'text-rose-600 dark:text-rose-400' : quizPassed ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                        {quizMetaText}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <ItemIcon size={12} />
                       <span>{item.duration}</span>
@@ -188,18 +329,28 @@ export default function LessonViewer() {
           <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 lg:px-10 flex justify-between items-center shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
             <button 
               onClick={toggleCompletion}
+              disabled={activeItem.type === 'graded' || activeItem.type === 'practice'}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-colors ${
                 isCompleted 
                   ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400' 
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-              }`}
+              } ${activeItem.type === 'graded' || activeItem.type === 'practice' ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               <FiCheckCircle size={20} />
-              {isCompleted ? 'Completed' : 'Mark as Complete'}
+              {activeItem.type === 'graded' || activeItem.type === 'practice'
+                ? isCompleted
+                  ? 'Assessment Completed'
+                  : 'Submit assessment to complete'
+                : isCompleted
+                  ? 'Completed'
+                  : 'Mark as Complete'}
             </button>
 
-            <button className="px-6 py-2.5 bg-[#000080] hover:bg-blue-800 dark:bg-[#0D9488] dark:hover:bg-teal-500 text-white font-bold rounded-lg transition-colors">
-              Next Module &rarr;
+            <button 
+              onClick={handleMoveToNextModule}
+              className="px-6 py-2.5 bg-[#000080] hover:bg-blue-800 dark:bg-[#0D9488] dark:hover:bg-teal-500 text-white font-bold rounded-lg transition-colors"
+            >
+              {nextModule ? 'Next Module →' : 'Return to Course Home'}
             </button>
           </div>
         </main>

@@ -5,6 +5,7 @@ import {
   FiAward, FiFileText, FiPaperclip, FiBookOpen, FiMessageCircle 
 } from 'react-icons/fi';
 import { getCourseById } from '../data/courses';
+import { formatRelativeTimestamp, getQuizAttempt, getResolvedCourse } from '../data/lmsProgress';
 
 const ITEM_TYPE_ICONS = {
   video: FiVideo,
@@ -19,7 +20,8 @@ const ITEM_TYPE_ICONS = {
 
 export default function CourseHome() {
   const { courseId } = useParams();
-  const course = getCourseById(courseId);
+  const baseCourse = getCourseById(courseId);
+  const course = baseCourse ? getResolvedCourse(baseCourse) : null;
   const [expandedLesson, setExpandedLesson] = useState(course?.lessons?.[0]?.id ?? null);
 
   if (!course) {
@@ -86,6 +88,24 @@ export default function CourseHome() {
                     {lesson.items.map((item) => {
                       const ItemIcon = ITEM_TYPE_ICONS[item.type] || FiFileText;
                       const isItemLocked = item.locked || course.status === 'future';
+                      const quizAttempt = item.type === 'practice' || item.type === 'graded'
+                        ? getQuizAttempt(course.id, lesson.id, item.id)
+                        : null;
+                      const hasQuizAttempt = Boolean(quizAttempt);
+                      const quizPassed = Boolean(quizAttempt?.passed);
+                      const quizTerminated = quizAttempt?.status === 'terminated';
+                      const quizAttemptTime = formatRelativeTimestamp(quizAttempt?.completedAt);
+
+                      const quizStatusText = quizAttempt
+                        ? quizTerminated
+                          ? 'Attempt terminated'
+                          : quizPassed
+                            ? `Passed • ${quizAttempt.score}/${quizAttempt.totalPoints}`
+                            : `Completed • ${quizAttempt.score}/${quizAttempt.totalPoints}`
+                        : null;
+                      const quizMetaText = quizStatusText && quizAttemptTime
+                        ? `${quizStatusText} • ${quizAttemptTime}`
+                        : quizStatusText;
 
                       if (isItemLocked) {
                         return (
@@ -97,7 +117,14 @@ export default function CourseHome() {
                               <div className={`p-2 rounded-lg ${item.type === 'graded' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
                                 <ItemIcon size={20} />
                               </div>
-                              <span className="font-medium text-slate-700 dark:text-slate-300">{item.title}</span>
+                              <div>
+                                <span className="font-medium text-slate-700 dark:text-slate-300">{item.title}</span>
+                                {hasQuizAttempt && (
+                                  <p className={`text-xs mt-1 font-semibold ${quizTerminated ? 'text-rose-600 dark:text-rose-400' : quizPassed ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                    {quizMetaText}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                             <span className="text-sm text-slate-500">{course.status === 'future' ? 'Starts soon' : 'Locked'}</span>
                           </div>
@@ -114,9 +141,16 @@ export default function CourseHome() {
                             <div className={`p-2 rounded-lg ${item.type === 'graded' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 group-hover:bg-[#000080] group-hover:text-white transition-colors'}`}>
                               <ItemIcon size={20} />
                             </div>
-                            <span className="font-medium text-slate-700 dark:text-slate-300 group-hover:text-[#000080] dark:group-hover:text-[#0D9488] transition-colors">
-                              {item.title}
-                            </span>
+                            <div>
+                              <span className="font-medium text-slate-700 dark:text-slate-300 group-hover:text-[#000080] dark:group-hover:text-[#0D9488] transition-colors">
+                                {item.title}
+                              </span>
+                              {hasQuizAttempt && (
+                                <p className={`text-xs mt-1 font-semibold ${quizTerminated ? 'text-rose-600 dark:text-rose-400' : quizPassed ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                  {quizMetaText}
+                                </p>
+                              )}
+                            </div>
                           </div>
                           <span className="text-sm text-slate-500">{item.duration}</span>
                         </Link>

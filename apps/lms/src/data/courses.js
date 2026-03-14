@@ -70,6 +70,42 @@ const BASE_LESSONS = [
 				content: {
 					id: 'content-practice-vector-addition',
 					description: 'Unproctored readiness quiz covering vector components and resolution.',
+					quizData: {
+						title: 'Practice Quiz: Vector Addition',
+						description:
+							'Test your understanding of vector components, displacement, and basic kinematics in a low-stakes practice environment.',
+						durationInSeconds: 480,
+						isProctored: false,
+						questions: [
+							{
+								id: 'practice-vectors-q1',
+								type: 'mcq',
+								points: 10,
+								text: 'A student walks 6 m east and 8 m north. What is the magnitude of the displacement?',
+								options: ['10 m', '14 m', '2 m', '48 m'],
+								correctAnswer: '10 m',
+							},
+							{
+								id: 'practice-vectors-q2',
+								type: 'mcq',
+								points: 10,
+								text: 'Which statement best describes a vector quantity?',
+								options: [
+									'It has magnitude only',
+									'It has direction only',
+									'It has both magnitude and direction',
+									'It is always constant',
+								],
+								correctAnswer: 'It has both magnitude and direction',
+							},
+							{
+								id: 'practice-vectors-q3',
+								type: 'short-answer',
+								points: 10,
+								text: 'Explain why vector components are useful when solving real-world motion problems.',
+							},
+						],
+					},
 				},
 			},
 			{
@@ -92,6 +128,37 @@ const BASE_LESSONS = [
 				content: {
 					id: 'content-graded-kinematics',
 					description: 'Timed graded assessment for lesson mastery.',
+					quizData: {
+						title: 'Graded Quiz: Kinematics Assessment',
+						description:
+							'This assessment covers vector addition, velocity, and acceleration. You have 10 minutes to complete it. Once you begin, do not leave this tab.',
+						durationInSeconds: 600,
+						isProctored: true,
+						questions: [
+							{
+								id: 'kinematics-q1',
+								type: 'mcq',
+								points: 10,
+								text: 'If a car travels 40 km east and then 30 km north, what is the magnitude of its displacement from the origin?',
+								options: ['10 km', '50 km', '70 km', '120 km'],
+								correctAnswer: '50 km',
+							},
+							{
+								id: 'kinematics-q2',
+								type: 'mcq',
+								points: 10,
+								text: 'Which of the following is a scalar quantity?',
+								options: ['Force', 'Velocity', 'Temperature', 'Acceleration'],
+								correctAnswer: 'Temperature',
+							},
+							{
+								id: 'kinematics-q3',
+								type: 'short-answer',
+								points: 20,
+								text: 'Briefly explain the difference between average speed and average velocity.',
+							},
+						],
+					},
 				},
 			},
 			{
@@ -144,6 +211,37 @@ const BASE_LESSONS = [
 				content: {
 					id: 'content-practice-fbd',
 					description: 'Practice force decomposition and sign convention.',
+					quizData: {
+						title: 'Practice Quiz: Free Body Diagrams',
+						description:
+							'Practice identifying forces, directions, and resultant motion before the graded dynamics assessment unlocks.',
+						durationInSeconds: 540,
+						isProctored: false,
+						questions: [
+							{
+								id: 'dynamics-practice-q1',
+								type: 'mcq',
+								points: 10,
+								text: 'A box resting on a floor has which pair of vertical forces acting on it?',
+								options: ['Applied force and friction', 'Weight and normal reaction', 'Tension and drag', 'Velocity and acceleration'],
+								correctAnswer: 'Weight and normal reaction',
+							},
+							{
+								id: 'dynamics-practice-q2',
+								type: 'mcq',
+								points: 10,
+								text: 'Which force usually opposes motion between two rough surfaces?',
+								options: ['Friction', 'Tension', 'Normal force', 'Weight'],
+								correctAnswer: 'Friction',
+							},
+							{
+								id: 'dynamics-practice-q3',
+								type: 'short-answer',
+								points: 10,
+								text: 'Describe how you would begin drawing a free body diagram for an object on an inclined plane.',
+							},
+						],
+					},
 				},
 			},
 			{
@@ -151,10 +249,42 @@ const BASE_LESSONS = [
 				type: 'graded',
 				title: 'Graded Quiz: Dynamics',
 				duration: '45 mins',
-				locked: true,
+				locked: false,
+				unlockAfter: ['item-practice-fbd'],
 				content: {
 					id: 'content-graded-dynamics',
 					description: 'Comprehensive graded quiz unlocked after practice completion.',
+					quizData: {
+						title: 'Graded Quiz: Dynamics',
+						description:
+							'This timed dynamics assessment unlocks after the practice quiz and includes proctoring safeguards.',
+						durationInSeconds: 900,
+						isProctored: true,
+						questions: [
+							{
+								id: 'dynamics-graded-q1',
+								type: 'mcq',
+								points: 10,
+								text: 'According to Newton\'s second law, if net force doubles while mass stays constant, acceleration will:',
+								options: ['Halve', 'Double', 'Remain unchanged', 'Become zero'],
+								correctAnswer: 'Double',
+							},
+							{
+								id: 'dynamics-graded-q2',
+								type: 'mcq',
+								points: 10,
+								text: 'What is the net force on an object moving at constant velocity in a straight line?',
+								options: ['Equal to its mass', 'Equal to its weight', 'Zero', 'Increasing'],
+								correctAnswer: 'Zero',
+							},
+							{
+								id: 'dynamics-graded-q3',
+								type: 'short-answer',
+								points: 20,
+								text: 'Explain how Newton\'s third law applies when a swimmer pushes water backward to move forward.',
+							},
+						],
+					},
 				},
 			},
 		],

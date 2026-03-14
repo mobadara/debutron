@@ -4,6 +4,7 @@ import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import { FiBook, FiCheckSquare, FiExternalLink, FiUsers } from 'react-icons/fi'
 import { ACTIVE_COURSES_BY_PROGRAM, PROGRAMS_BY_TRACK, TRACK_LABELS } from '../data/courses'
+import { getCourseProgressPercentage } from '../data/lmsProgress'
 import { LMS_CALENDAR_EVENTS, LMS_STUDENT } from '../data/dashboard'
 
 function LMSDashboard() {
@@ -104,7 +105,10 @@ function LMSDashboard() {
 
 				{/* Course Grid */}
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6">
-					{currentCourses.map((course) => (
+					{currentCourses.map((course) => {
+						const courseProgress = getCourseProgressPercentage(course)
+
+						return (
 						<Link
 							key={course.id}
 							to={`/course/${course.id}/home`}
@@ -124,10 +128,10 @@ function LMSDashboard() {
 								<div className="mt-4">
 									<div className="mb-1 flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400">
 										<span>Progress</span>
-										<span>{course.progress}%</span>
+										<span>{courseProgress}%</span>
 									</div>
 									<div className="h-2 rounded-full bg-slate-200 dark:bg-slate-700">
-										<div className="h-2 rounded-full bg-blue-600" style={{ width: `${course.progress}%` }} />
+										<div className="h-2 rounded-full bg-blue-600" style={{ width: `${courseProgress}%` }} />
 									</div>
 								</div>
 								<div className="mt-4 flex items-center gap-2" onClick={(event) => event.preventDefault()}>
@@ -173,7 +177,8 @@ function LMSDashboard() {
 								</div>
 							</div>
 						</Link>
-					))}
+						)
+					})}
 				</div>
 			</div>
 
