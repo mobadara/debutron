@@ -144,6 +144,33 @@ export default function LessonViewer() {
   }, [isActiveProctoredQuiz, isTesting, setIsProctoredLockdown]);
 
   useEffect(() => {
+    if (!isTesting || !isActiveProctoredQuiz) {
+      return;
+    }
+
+    const handleEscapeBlock = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        enterFullscreen();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeBlock, true);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeBlock, true);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [isActiveProctoredQuiz, isTesting]);
+
+  useEffect(() => {
     if (!searchParams.get('item') && defaultItemId) {
       setSearchParams({ item: defaultItemId }, { replace: true });
     }
