@@ -10,7 +10,7 @@ import {
   FiZoomOut
 } from 'react-icons/fi';
 
-export default function QuizEngine({ quizData, onComplete, onStart }) {
+export default function QuizEngine({ quizData, onComplete, onStart, onTerminate }) {
   const [status, setStatus] = useState('start'); 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -93,7 +93,7 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-  }, [status, quizData.isProctored]);
+  }, [status, quizData.isProctored, onTerminate]);
 
   // --- Anti-Cheat Tab Proctoring Hook ---
   useEffect(() => {
@@ -106,6 +106,7 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
           if (newWarnings >= MAX_WARNINGS) {
             setStatus('terminated');
             if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+            if (onTerminate) onTerminate();
           } else {
             playWarningSound();
             setShowWarningModal(true);
@@ -117,7 +118,7 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [status, quizData.isProctored]);
+  }, [status, quizData.isProctored, onTerminate]);
 
   // --- Timer Hook ---
   useEffect(() => {
@@ -147,6 +148,15 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
   };
 
   const currentQuestion = quizData.questions[currentQuestionIndex];
+  const isQuestionAttempted = (question) => {
+    const response = answers[question.id];
+
+    if (question.type === 'short-answer') {
+      return typeof response === 'string' && response.trim().length > 0;
+    }
+
+    return response !== undefined && response !== null && response !== '';
+  };
 
   // --- Render States ---
 
@@ -161,6 +171,7 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
           {quizData.description}
         </p>
         <button 
+          type="button"
           onClick={() => {
             if (onStart) onStart();
             setStatus('in-progress');
@@ -178,20 +189,20 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
 
   // --- In Progress Render (Side-by-Side Layout) ---
   return (
-    <div className="relative flex flex-col md:flex-row h-[80vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+    <div className="relative flex flex-col md:flex-row h-[82vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
       
       {showWarningModal && ( /* Modal logic remains same */
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white border-2 border-rose-500 rounded-xl p-8 max-w-md w-full text-center">
              <h3 className="text-2xl font-black mb-2">Integrity Warning</h3>
-             <button onClick={() => setShowWarningModal(false)} className="w-full py-3 bg-rose-600 text-white font-bold rounded-lg">Return to Exam</button>
+             <button type="button" onClick={() => setShowWarningModal(false)} className="w-full py-3 bg-rose-600 text-white font-bold rounded-lg">Return to Exam</button>
           </div>
         </div>
       )}
 
       {/* --- Left Column: Fixed Proctoring Area --- */}
       {quizData.isProctored && (
-        <div className="w-full md:w-80 lg:w-96 flex-shrink-0 bg-slate-100 dark:bg-slate-950 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col">
+        <div className="w-full md:w-[28rem] lg:w-[34rem] flex-shrink-0 bg-slate-100 dark:bg-slate-950 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-200/50 dark:bg-slate-900">
             <span className="font-bold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wider">Proctoring Active</span>
             <div className="flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-500 animate-pulse">
@@ -265,7 +276,7 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
 
         {/* Question Body (Text size bound to state) */}
         <div className="flex-1 p-8 overflow-y-auto pb-24" style={{ fontSize: `${textScale}rem` }}>
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <span className="text-[0.7em] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
               {currentQuestion.type === 'mcq' ? `Multiple Choice (${currentQuestion.points} pts)` : `Short Answer (${currentQuestion.points} pts)`}
             </span>
@@ -294,20 +305,57 @@ export default function QuizEngine({ quizData, onComplete, onStart }) {
                 ))}
               </div>
             )}
-            
-            {/* Short Answer block would go here, omitting for brevity as it works identically */}
+
+            {currentQuestion.type === 'short-answer' && (
+              <textarea
+                value={answers[currentQuestion.id] || ''}
+                onChange={(event) => handleAnswer(currentQuestion.id, event.target.value)}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                }}
+                placeholder="Type your answer here..."
+                className="w-full min-h-56 bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-slate-900 dark:text-slate-100 focus:border-[#000080] dark:focus:border-[#0D9488] outline-none resize-y transition-colors"
+              />
+            )}
           </div>
         </div>
 
         {/* Footer Controls */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between z-30">
-          <button onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))} disabled={currentQuestionIndex === 0} className="flex items-center gap-2 px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg disabled:opacity-50">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between gap-4 z-30">
+          <button type="button" onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))} disabled={currentQuestionIndex === 0} className="flex-shrink-0 flex items-center gap-2 px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg disabled:opacity-50">
             <FiChevronLeft /> Previous
           </button>
+
+          <div className="hidden md:flex flex-1 items-center justify-start gap-2 overflow-x-auto px-2 py-1 min-w-0">
+            {quizData.questions.map((question, index) => {
+              const attempted = isQuestionAttempted(question);
+              const isActiveQuestion = index === currentQuestionIndex;
+
+              return (
+                <button
+                  type="button"
+                  key={question.id}
+                  onClick={() => setCurrentQuestionIndex(index)}
+                  className={`relative w-9 h-9 rounded-lg text-xs font-bold border transition-colors ${
+                    isActiveQuestion
+                      ? 'bg-[#000080] text-white border-[#000080] dark:bg-[#0D9488] dark:border-[#0D9488]'
+                      : attempted
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800'
+                        : 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                  }`}
+                  title={attempted ? `Question ${index + 1} attempted` : `Question ${index + 1} not attempted`}
+                >
+                  {index + 1}
+                  <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${attempted ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                </button>
+              );
+            })}
+          </div>
+
           {currentQuestionIndex === quizData.questions.length - 1 ? (
-            <button onClick={submitQuiz} className="px-8 py-2 bg-[#000080] dark:bg-[#0D9488] text-white font-bold rounded-lg shadow-md">Submit Assessment</button>
+            <button type="button" onClick={submitQuiz} className="flex-shrink-0 px-8 py-2 bg-[#000080] dark:bg-[#0D9488] text-white font-bold rounded-lg shadow-md">Submit Assessment</button>
           ) : (
-            <button onClick={() => setCurrentQuestionIndex(prev => Math.min(quizData.questions.length - 1, prev + 1))} className="flex items-center gap-2 px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-lg shadow-md">
+            <button type="button" onClick={() => setCurrentQuestionIndex(prev => Math.min(quizData.questions.length - 1, prev + 1))} className="flex-shrink-0 flex items-center gap-2 px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-lg shadow-md">
               Next <FiChevronRight />
             </button>
           )}

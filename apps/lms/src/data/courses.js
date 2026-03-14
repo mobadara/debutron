@@ -36,6 +36,12 @@ const BASE_LESSONS = [
 					videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
 					description:
 						'In this lecture, students are introduced to vector spaces and how direction-based quantities differ from scalar values.',
+					captionTracks: [
+						{ srclang: 'en', label: 'English', src: '/captions/vectors-en.vtt', default: true },
+						{ srclang: 'es', label: 'Español', src: '/captions/vectors-es.vtt' },
+						{ srclang: 'fr', label: 'Français', src: '/captions/vectors-fr.vtt' },
+						{ srclang: 'ar', label: 'العربية', src: '/captions/vectors-ar.vtt' },
+					],
 				},
 			},
 			{
@@ -200,6 +206,12 @@ const BASE_LESSONS = [
 					id: 'content-video-inertia',
 					videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
 					description: 'Overview of mass, inertia, and dynamic systems under external force.',
+					captionTracks: [
+						{ srclang: 'en', label: 'English', src: '/captions/inertia-en.vtt', default: true },
+						{ srclang: 'es', label: 'Español', src: '/captions/inertia-es.vtt' },
+						{ srclang: 'fr', label: 'Français', src: '/captions/inertia-fr.vtt' },
+						{ srclang: 'ar', label: 'العربية', src: '/captions/inertia-ar.vtt' },
+					],
 				},
 			},
 			{

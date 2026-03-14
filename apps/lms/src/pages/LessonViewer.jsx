@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, Link, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -29,8 +29,12 @@ const ITEM_TYPE_ICONS = {
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams();
   const [isTesting, setIsTesting] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [ccEnabled, setCcEnabled] = useState(true);
+  const [selectedCaptionLang, setSelectedCaptionLang] = useState('en');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { setIsProctoredLockdown } = useOutletContext() || {};
   const baseCourse = getCourseById(courseId);
   const baseLesson = getLessonById(courseId, lessonId);
   const [lessonProgress, setLessonProgress] = useState(() => getLessonProgress(courseId, lessonId));
@@ -54,12 +58,90 @@ export default function LessonViewer() {
   const activeItem = lessonData?.items.find((item) => item.id === activeItemId) || lessonData?.items?.[0];
   const completedItems = lessonProgress.completedItemIds;
   const isCompleted = completedItems.includes(activeItemId);
+  const activeVideoData = activeItem?.type === 'video' ? activeItem.content : null;
+  const captionTracks = useMemo(() => activeVideoData?.captionTracks ?? [], [activeVideoData]);
+  const videoRef = React.useRef(null);
 
   useEffect(() => {
     if (activeItem?.type !== 'practice' && activeItem?.type !== 'graded') {
       setIsTesting(false);
     }
   }, [activeItem]);
+
+  useEffect(() => {
+    if (activeItem?.type !== 'video') {
+      return;
+    }
+
+    setPlaybackRate(1);
+    setCcEnabled(true);
+    setSelectedCaptionLang(captionTracks.find((track) => track.default)?.srclang || captionTracks[0]?.srclang || 'en');
+  }, [activeItem?.type, captionTracks]);
+
+  useEffect(() => {
+    if (!videoRef.current || activeItem?.type !== 'video') {
+      return;
+    }
+
+    videoRef.current.playbackRate = playbackRate;
+  }, [activeItem, playbackRate]);
+
+  useEffect(() => {
+    if (!videoRef.current || activeItem?.type !== 'video') {
+      return;
+    }
+
+    const textTracks = Array.from(videoRef.current.textTracks || []);
+    textTracks.forEach((track) => {
+      if (!ccEnabled) {
+        track.mode = 'disabled';
+        return;
+      }
+
+      track.mode = track.language === selectedCaptionLang ? 'showing' : 'disabled';
+    });
+  }, [activeItem, ccEnabled, selectedCaptionLang]);
+
+  const isActiveProctoredQuiz = activeItem?.type === 'graded' && activeItem?.content?.quizData?.isProctored;
+
+  const enterFullscreen = async () => {
+    const fullscreenTarget = document.documentElement;
+
+    if (document.fullscreenElement || !fullscreenTarget?.requestFullscreen) {
+      return;
+    }
+
+    try {
+      await fullscreenTarget.requestFullscreen();
+    } catch {
+      // Ignore browsers that block fullscreen without direct user permission.
+    }
+  };
+
+  const exitFullscreen = async () => {
+    if (!document.fullscreenElement || !document.exitFullscreen) {
+      return;
+    }
+
+    try {
+      await document.exitFullscreen();
+    } catch {
+      // Ignore if browser refuses fullscreen exit during transitions.
+    }
+  };
+
+  useEffect(() => {
+    const shouldLockdown = Boolean(isTesting && isActiveProctoredQuiz);
+    setIsProctoredLockdown?.(shouldLockdown);
+
+    if (!shouldLockdown) {
+      exitFullscreen();
+    }
+
+    return () => {
+      setIsProctoredLockdown?.(false);
+    };
+  }, [isActiveProctoredQuiz, isTesting, setIsProctoredLockdown]);
 
   useEffect(() => {
     if (!searchParams.get('item') && defaultItemId) {
@@ -135,9 +217,63 @@ export default function LessonViewer() {
         const videoData = activeItem.content;
         return (
           <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 lg:p-5 flex flex-col lg:flex-row gap-4 lg:items-end">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Playback Speed</label>
+                <select
+                  value={playbackRate}
+                  onChange={(event) => setPlaybackRate(Number(event.target.value))}
+                  className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200"
+                >
+                  {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
+                    <option key={speed} value={speed}>{speed}x</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 pt-5 lg:pt-0">
+                <input
+                  id="video-cc-toggle"
+                  type="checkbox"
+                  checked={ccEnabled}
+                  onChange={(event) => setCcEnabled(event.target.checked)}
+                  className="w-4 h-4 text-[#000080] dark:text-[#0D9488]"
+                />
+                <label htmlFor="video-cc-toggle" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Enable CC</label>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Caption Language</label>
+                <select
+                  value={selectedCaptionLang}
+                  onChange={(event) => setSelectedCaptionLang(event.target.value)}
+                  disabled={!ccEnabled || captionTracks.length === 0}
+                  className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 disabled:opacity-50"
+                >
+                  {captionTracks.length === 0 ? (
+                    <option value="">No captions available</option>
+                  ) : (
+                    captionTracks.map((track) => (
+                      <option key={track.srclang} value={track.srclang}>{track.label}</option>
+                    ))
+                  )}
+                </select>
+              </div>
+            </div>
+
             <div className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-lg border border-slate-800">
-              <video controls className="w-full h-full object-cover">
+              <video ref={videoRef} controls className="w-full h-full object-cover">
                 <source src={videoData.videoUrl} type="video/mp4" />
+                {captionTracks.map((track) => (
+                  <track
+                    key={track.srclang}
+                    kind="subtitles"
+                    srcLang={track.srclang}
+                    label={track.label}
+                    src={track.src}
+                    default={track.default}
+                  />
+                ))}
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -171,11 +307,17 @@ export default function LessonViewer() {
         }
         
         return (
-          <div className="w-full h-full max-w-4xl mx-auto py-6">
+          <div className="w-full h-full py-3 lg:py-4">
             <QuizEngine 
               key={activeItem.id}
               quizData={quizPayload} 
-              onStart={() => setIsTesting(true)}
+              onStart={() => {
+                setIsTesting(true);
+
+                if (quizPayload.isProctored) {
+                  enterFullscreen();
+                }
+              }}
               onComplete={(score) => {
                 setIsTesting(false);
                 persistLessonProgress((previousProgress) => ({
@@ -201,6 +343,9 @@ export default function LessonViewer() {
                     },
                   },
                 }));
+              }}
+              onTerminate={() => {
+                setIsTesting(false);
               }} 
               onReturn={() => navigate(`/course/${courseId}/home`)}
             />
@@ -320,7 +465,7 @@ export default function LessonViewer() {
 
         {/* Main Canvas Area */}
         <main className="flex-1 flex flex-col overflow-y-auto relative bg-slate-50 dark:bg-slate-950">
-          <div className="flex-1 p-6 lg:p-10 max-w-5xl mx-auto w-full">
+          <div className={`flex-1 w-full ${isTesting ? 'p-3 lg:p-4 max-w-none' : 'p-6 lg:p-10 max-w-5xl mx-auto'}`}>
             {/* The Dynamic Content gets rendered here */}
             {renderContent()}
           </div>
