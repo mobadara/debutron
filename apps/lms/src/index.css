@@ -107,3 +107,28 @@
     font-size: 0.75rem;
   }
 }
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .reading-printable,
+  .reading-printable * {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  .reading-printable .katex,
+  .reading-printable .katex * {
+    color: #000000 !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+}

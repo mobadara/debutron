@@ -6,10 +6,10 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { 
   FiChevronLeft, FiVideo, FiBookOpen, FiUsers, FiEdit3, 
-  FiAward, FiFileText, FiPaperclip, FiCheckCircle, FiCircle
+  FiAward, FiFileText, FiPaperclip, FiCheckCircle, FiCircle, FiPrinter, FiVolume2, FiSquare
 } from 'react-icons/fi';
 import 'katex/dist/katex.min.css';
-import { getCourseById, getLessonById } from '../data/courses';
+import { getCourseById } from '../data/courses';
 import { formatRelativeTimestamp, getLessonProgress, getQuizAttempt, getResolvedCourse, getResolvedLesson, saveLessonProgress } from '../data/lmsProgress';
 
 import QuizEngine from '../components/course/QuizEngine';
@@ -29,14 +29,12 @@ const ITEM_TYPE_ICONS = {
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams();
   const [isTesting, setIsTesting] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const [ccEnabled, setCcEnabled] = useState(true);
-  const [selectedCaptionLang, setSelectedCaptionLang] = useState('en');
+  const [isReadingAloud, setIsReadingAloud] = useState(false);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setIsProctoredLockdown } = useOutletContext() || {};
-  const baseCourse = getCourseById(courseId);
-  const baseLesson = getLessonById(courseId, lessonId);
+  const outletContext = useOutletContext();
+  const { setIsProctoredLockdown } = outletContext || {};
+  const baseCourse = outletContext?.course ?? getCourseById(courseId);
   const [lessonProgress, setLessonProgress] = useState(() => getLessonProgress(courseId, lessonId));
 
   useEffect(() => {
@@ -46,6 +44,11 @@ export default function LessonViewer() {
   const course = useMemo(
     () => (baseCourse ? getResolvedCourse(baseCourse) : null),
     [baseCourse]
+  );
+
+  const baseLesson = useMemo(
+    () => course?.lessons?.find((lesson) => lesson.id === lessonId) ?? null,
+    [course, lessonId]
   );
 
   const lessonData = useMemo(
@@ -59,8 +62,9 @@ export default function LessonViewer() {
   const completedItems = lessonProgress.completedItemIds;
   const isCompleted = completedItems.includes(activeItemId);
   const activeVideoData = activeItem?.type === 'video' ? activeItem.content : null;
-  const captionTracks = useMemo(() => activeVideoData?.captionTracks ?? [], [activeVideoData]);
+  const captionTracks = activeVideoData?.captionTracks ?? [];
   const videoRef = React.useRef(null);
+  const speechUtteranceRef = React.useRef(null);
 
   useEffect(() => {
     if (activeItem?.type !== 'practice' && activeItem?.type !== 'graded') {
@@ -69,38 +73,19 @@ export default function LessonViewer() {
   }, [activeItem]);
 
   useEffect(() => {
-    if (activeItem?.type !== 'video') {
-      return;
+    if (activeItem?.type !== 'reading' && isReadingAloud) {
+      window.speechSynthesis?.cancel();
+      speechUtteranceRef.current = null;
+      setIsReadingAloud(false);
     }
-
-    setPlaybackRate(1);
-    setCcEnabled(true);
-    setSelectedCaptionLang(captionTracks.find((track) => track.default)?.srclang || captionTracks[0]?.srclang || 'en');
-  }, [activeItem?.type, captionTracks]);
+  }, [activeItem, isReadingAloud]);
 
   useEffect(() => {
-    if (!videoRef.current || activeItem?.type !== 'video') {
-      return;
-    }
-
-    videoRef.current.playbackRate = playbackRate;
-  }, [activeItem, playbackRate]);
-
-  useEffect(() => {
-    if (!videoRef.current || activeItem?.type !== 'video') {
-      return;
-    }
-
-    const textTracks = Array.from(videoRef.current.textTracks || []);
-    textTracks.forEach((track) => {
-      if (!ccEnabled) {
-        track.mode = 'disabled';
-        return;
-      }
-
-      track.mode = track.language === selectedCaptionLang ? 'showing' : 'disabled';
-    });
-  }, [activeItem, ccEnabled, selectedCaptionLang]);
+    return () => {
+      window.speechSynthesis?.cancel();
+      speechUtteranceRef.current = null;
+    };
+  }, []);
 
   const isActiveProctoredQuiz = activeItem?.type === 'graded' && activeItem?.content?.quizData?.isProctored;
 
@@ -182,13 +167,19 @@ export default function LessonViewer() {
     }
   }, [activeItem, defaultItemId, setSearchParams]);
 
-  if (!course || !lessonData || !activeItem) {
+  useEffect(() => {
+    if (lessonData?.disabled) {
+      navigate(`/course/${courseId}/contents`, { replace: true });
+    }
+  }, [courseId, lessonData?.disabled, navigate]);
+
+  if (!course || !lessonData || !activeItem || lessonData?.disabled) {
     return (
       <div className="flex-1 w-full flex flex-col bg-slate-50 dark:bg-slate-950 p-6 lg:p-10">
         <div className="max-w-4xl mx-auto w-full bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Lesson not found</h1>
           <p className="text-slate-600 dark:text-slate-400 mb-6">This lesson may have been moved or removed.</p>
-          <Link to={`/course/${courseId}/home`} className="inline-block bg-[#000080] text-white px-4 py-2 rounded-lg font-bold">
+          <Link to={`/course/${courseId}/overview`} className="inline-block bg-[#000080] text-white px-4 py-2 rounded-lg font-bold">
             Back to course home
           </Link>
         </div>
@@ -230,11 +221,98 @@ export default function LessonViewer() {
 
   const handleMoveToNextModule = () => {
     if (!nextModule) {
-      navigate(`/course/${courseId}/home`);
+      navigate(`/course/${courseId}/overview`);
       return;
     }
 
     navigate(`/course/${courseId}/lesson/${nextModule.lessonId}?item=${nextModule.itemId}`);
+  };
+
+  const stripMarkdownForSpeech = (markdown = '') => markdown
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]\([^)]*\)/g, '$1')
+    .replace(/[#>*_~-]/g, ' ')
+    .replace(/\$\$[\s\S]*?\$\$/g, ' ')
+    .replace(/\$[^$]*\$/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const handlePrintReading = () => {
+    window.print();
+  };
+
+  const handleToggleListenReading = (markdown) => {
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+      return;
+    }
+
+    if (isReadingAloud) {
+      window.speechSynthesis.cancel();
+      speechUtteranceRef.current = null;
+      setIsReadingAloud(false);
+      return;
+    }
+
+    const contentToRead = stripMarkdownForSpeech(markdown);
+    if (!contentToRead) {
+      return;
+    }
+
+    if (videoRef.current && !videoRef.current.paused) {
+      videoRef.current.pause();
+    }
+
+    const utterance = new SpeechSynthesisUtterance(contentToRead);
+    const voices = window.speechSynthesis.getVoices();
+    const preferredFemaleVoicePatterns = [
+      'Google UK English Female',
+      'Microsoft Aria',
+      'Microsoft Zira',
+      'Samantha',
+      'Karen',
+      'Victoria',
+    ];
+
+    let selectedVoice = null;
+    for (const voicePattern of preferredFemaleVoicePatterns) {
+      selectedVoice = voices.find((voice) =>
+        voice.name.toLowerCase().includes(voicePattern.toLowerCase())
+      );
+      if (selectedVoice) {
+        break;
+      }
+    }
+
+    if (!selectedVoice) {
+      selectedVoice = voices.find((voice) => {
+        const descriptor = `${voice.name} ${voice.voiceURI}`.toLowerCase();
+        return descriptor.includes('female') || descriptor.includes('zira') || descriptor.includes('samantha');
+      });
+    }
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    }
+
+    utterance.rate = 0.82;
+    utterance.pitch = 1;
+    utterance.volume = 0.95;
+    utterance.onend = () => {
+      speechUtteranceRef.current = null;
+      setIsReadingAloud(false);
+    };
+    utterance.onerror = () => {
+      speechUtteranceRef.current = null;
+      setIsReadingAloud(false);
+    };
+
+    speechUtteranceRef.current = utterance;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    setIsReadingAloud(true);
   };
 
   // Dynamic Content Renderer
@@ -244,50 +322,6 @@ export default function LessonViewer() {
         const videoData = activeItem.content;
         return (
           <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 lg:p-5 flex flex-col lg:flex-row gap-4 lg:items-end">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Playback Speed</label>
-                <select
-                  value={playbackRate}
-                  onChange={(event) => setPlaybackRate(Number(event.target.value))}
-                  className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200"
-                >
-                  {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
-                    <option key={speed} value={speed}>{speed}x</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-center gap-2 pt-5 lg:pt-0">
-                <input
-                  id="video-cc-toggle"
-                  type="checkbox"
-                  checked={ccEnabled}
-                  onChange={(event) => setCcEnabled(event.target.checked)}
-                  className="w-4 h-4 text-[#000080] dark:text-[#0D9488]"
-                />
-                <label htmlFor="video-cc-toggle" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Enable CC</label>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Caption Language</label>
-                <select
-                  value={selectedCaptionLang}
-                  onChange={(event) => setSelectedCaptionLang(event.target.value)}
-                  disabled={!ccEnabled || captionTracks.length === 0}
-                  className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 disabled:opacity-50"
-                >
-                  {captionTracks.length === 0 ? (
-                    <option value="">No captions available</option>
-                  ) : (
-                    captionTracks.map((track) => (
-                      <option key={track.srclang} value={track.srclang}>{track.label}</option>
-                    ))
-                  )}
-                </select>
-              </div>
-            </div>
-
             <div className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-lg border border-slate-800">
               <video ref={videoRef} controls className="w-full h-full object-cover">
                 <source src={videoData.videoUrl} type="video/mp4" />
@@ -315,7 +349,25 @@ export default function LessonViewer() {
       case 'reading': {
         const readData = activeItem.content;
         return (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 lg:p-12 shadow-sm animate-in fade-in duration-300">
+          <div className="reading-printable bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 lg:p-12 shadow-sm animate-in fade-in duration-300">
+            <div className="print:hidden flex flex-wrap items-center justify-end gap-3 mb-6">
+              <button
+                type="button"
+                onClick={() => handleToggleListenReading(readData.markdown)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+              >
+                {isReadingAloud ? <FiSquare size={16} /> : <FiVolume2 size={16} />}
+                {isReadingAloud ? 'Stop Listening' : 'Listen'}
+              </button>
+              <button
+                type="button"
+                onClick={handlePrintReading}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-white bg-[#000080] hover:bg-blue-800 dark:bg-[#0D9488] dark:hover:bg-teal-500 transition-colors"
+              >
+                <FiPrinter size={16} />
+                Print
+              </button>
+            </div>
             <div className="prose prose-lg prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-900 prose-pre:text-slate-50 prose-code:text-[#0D9488]">
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                 {readData.markdown}
@@ -374,7 +426,7 @@ export default function LessonViewer() {
               onTerminate={() => {
                 setIsTesting(false);
               }} 
-              onReturn={() => navigate(`/course/${courseId}/home`)}
+              onReturn={() => navigate(`/course/${courseId}/overview`)}
             />
           </div>
         );
@@ -410,7 +462,7 @@ export default function LessonViewer() {
       {/* Top Navigation Bar */}
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between z-10 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Link to={`/course/${courseId}/home`} className="p-2 text-slate-500 hover:text-[#000080] dark:hover:text-[#0D9488] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg transition-colors">
+          <Link to={`/course/${courseId}/overview`} className="p-2 text-slate-500 hover:text-[#000080] dark:hover:text-[#0D9488] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg transition-colors">
             <FiChevronLeft size={20} />
           </Link>
           <div className="hidden sm:block">

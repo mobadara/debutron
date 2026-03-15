@@ -24,6 +24,7 @@ const BASE_LESSONS = [
 		id: 'lesson-1',
 		title: 'Lesson 1: Vectors and Kinematics',
 		dates: 'Oct 12 - Oct 26',
+		availableFrom: '2025-10-12T00:00:00Z',
 		items: [
 			{
 				id: 'item-video-intro-vectors',
@@ -195,6 +196,7 @@ const BASE_LESSONS = [
 		id: 'lesson-2',
 		title: "Lesson 2: Newton's Laws of Motion",
 		dates: 'Oct 27 - Nov 14',
+		availableFrom: '2025-10-27T00:00:00Z',
 		items: [
 			{
 				id: 'item-video-inertia',
@@ -297,6 +299,29 @@ const BASE_LESSONS = [
 							},
 						],
 					},
+				},
+			},
+		],
+	},
+	{
+		id: 'lesson-3',
+		title: 'Lesson 3: Energy, Work & Power',
+		dates: 'Nov 15 - Nov 30',
+		availableFrom: '2026-11-15T00:00:00Z',
+		items: [
+			{
+				id: 'item-video-energy',
+				type: 'video',
+				title: 'Video: Work and Energy Theorems',
+				duration: '48 mins',
+				locked: false,
+				content: {
+					id: 'content-video-energy',
+					videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+					description: 'An introduction to the work-energy theorem and its applications in mechanics.',
+					captionTracks: [
+						{ srclang: 'en', label: 'English', src: '/captions/vectors-en.vtt', default: true },
+					],
 				},
 			},
 		],
@@ -441,12 +466,3 @@ export const ACTIVE_COURSES_BY_PROGRAM = Object.fromEntries(
 )
 
 export const getCourseById = (courseId) => ALL_COURSES.find((course) => course.id === courseId)
-
-export const getLessonById = (courseId, lessonId) => {
-	const course = getCourseById(courseId)
-	if (!course) {
-		return null
-	}
-
-	return course.lessons.find((lesson) => lesson.id === lessonId) ?? null
-}

@@ -1,5 +1,5 @@
 import 'katex/dist/katex.min.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { A11yProvider } from '@debutron/ui'
 
 import LMSDashboard from './pages/LMSDashboard'
@@ -9,21 +9,24 @@ import GlobalForum from './pages/GlobalForum'
 import ForumNewDiscussion from './pages/ForumNewDiscussion'
 import DiscussionView from './pages/DiscussionView'
 import AllCourses from './pages/AllCourses';
-import CourseHome from './pages/CourseHome';
 import LessonViewer from './pages/LessonViewer';
+import CourseLayout from './layouts/CourseLayout';
+import CourseOverview from './pages/CourseOverview';
+import CourseContents from './pages/CourseContents';
+
+function LegacyCourseHomeRedirect() {
+  const { courseId } = useParams()
+  return <Navigate to={`/course/${courseId}/contents`} replace />
+}
 
 function App() {
   return (
     <A11yProvider>
       <Router>
         <Routes>
-          {/* 2. The Standalone Login Route (No TopBar, No Footer) */}
           <Route path="/login" element={<LMSLogin />} />
-
-          {/* 3. The Root Redirect now points to Login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* 4. The Authenticated App Layout */}
           <Route path="/" element={<LMSLayout />}>
             <Route path="dashboard" element={<LMSDashboard />} />
             <Route path="forums/global" element={<GlobalForum />} />
@@ -31,7 +34,17 @@ function App() {
             <Route path="forums/discussion/:postId" element={<DiscussionView />} />
             <Route path="forums/global/new" element={<ForumNewDiscussion />} />
             <Route path="courses" element={<AllCourses />} />
-            <Route path="course/:courseId/home" element={<CourseHome />} />
+
+            {/* The Cleaned Up Course Nested Routing */}
+            <Route path="course/:courseId" element={<CourseLayout />}>
+              <Route index element={<Navigate to="overview" replace />} />
+              <Route path="overview" element={<CourseOverview />} />
+              <Route path="contents" element={<CourseContents />} />
+            </Route>
+
+            <Route path="course/:courseId/home" element={<LegacyCourseHomeRedirect />} />
+            
+            {/* Lesson Viewer lives outside CourseLayout so it can take up the full screen */}
             <Route path="course/:courseId/lesson/:lessonId" element={<LessonViewer />} />
           </Route>
         </Routes>

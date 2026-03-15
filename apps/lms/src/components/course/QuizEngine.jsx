@@ -41,6 +41,7 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
   // Mobile Pairing State
   const [isMobilePaired, setIsMobilePaired] = useState(false);
   const [releaseStatus, setReleaseStatus] = useState({ released: false, reason: '' });
+  const [showReleaseToast, setShowReleaseToast] = useState(false);
 
   const isMobileDevice = useMemo(() => {
     if (typeof window === 'undefined') {
@@ -66,6 +67,18 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
   );
 
   const MAX_WARNINGS = 3;
+
+  useEffect(() => {
+    if (!showReleaseToast) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setShowReleaseToast(false);
+    }, 4500);
+
+    return () => clearTimeout(timeout);
+  }, [showReleaseToast]);
 
   const releaseMediaStreams = useCallback((options = {}) => {
     const { announce = false, reason = '' } = options;
@@ -94,6 +107,7 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
     setIsMobilePaired(false);
     if (announce && hadActiveStream) {
       setReleaseStatus({ released: true, reason });
+      setShowReleaseToast(true);
     }
   }, []);
 
@@ -253,11 +267,30 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
     return response !== undefined && response !== null && response !== '';
   };
 
+  const renderReleaseToast = () => {
+    if (!showReleaseToast) {
+      return null;
+    }
+
+    return (
+      <div className="fixed top-4 right-4 z-[120] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 shadow-lg max-w-sm dark:bg-emerald-900/30 dark:border-emerald-900/40">
+        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+          <FiCheckCircle /> Camera & microphone released
+        </p>
+        <p className="text-xs text-emerald-700/90 dark:text-emerald-300/90 mt-1">
+          Other applications can now access your media devices.
+        </p>
+      </div>
+    );
+  };
+
   // --- Render States ---
 
   if (status === 'start') {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in duration-300">
+        {renderReleaseToast()}
+
         <QuizInstructionModal
           isOpen={showInstructionModal}
           isProctored={quizData.isProctored}
@@ -309,6 +342,8 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
 
   if (status === 'terminated') return (
     <div className="p-20 text-center">
+      {renderReleaseToast()}
+
       <h2 className="text-3xl font-bold text-rose-500 mb-4">Exam Terminated</h2>
       <p className="text-slate-500">You violated the tab policy.</p>
       {releaseStatus.released && (
@@ -321,6 +356,8 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
 
   if (status === 'completed') return (
     <div className="p-20 text-center">
+      {renderReleaseToast()}
+
       <h2 className="text-3xl font-bold text-emerald-500 mb-4">Exam Submitted</h2>
       <p className="text-slate-500">Your video is being processed.</p>
       {releaseStatus.released && (
@@ -334,6 +371,8 @@ export default function QuizEngine({ quizData, onComplete, onStart, onTerminate 
   // --- In Progress Render (Side-by-Side Layout) ---
   return (
     <div className="relative flex flex-col md:flex-row h-[82vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+      {renderReleaseToast()}
+
       
       {showWarningModal && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">

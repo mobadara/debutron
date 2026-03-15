@@ -31,41 +31,42 @@ export default function AllCourses() {
 
         {/* Course Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredCourses.map(course => {
+          {filteredCourses.map((course) => {
             const courseProgress = getCourseProgressPercentage(course);
 
             return (
-            <Link key={course.id} to={`/course/${course.id}/home`} className="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-lg hover:border-[#000080] dark:hover:border-[#0D9488] transition-all">
-              <div className="h-32 bg-gradient-to-br from-[#000080] to-blue-900 relative p-4 flex flex-col justify-between">
-                <span className="self-start bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-xs font-bold tracking-wider uppercase">
-                  {course.track}
-                </span>
-                {course.status === 'completed' && <div className="absolute top-4 right-4 bg-emerald-500 text-white p-1 rounded-full"><FiCheckCircle size={20} /></div>}
-              </div>
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight mb-2 group-hover:text-[#000080] dark:group-hover:text-[#0D9488] transition-colors">{course.title}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{course.instructor.name}</p>
-                
-                <div className="mt-auto">
-                  {course.status === 'active' && (
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mb-2">
-                      <div className="bg-[#0D9488] h-2 rounded-full transition-all duration-500" style={{ width: `${courseProgress}%` }}></div>
+              <Link key={course.id} to={`/course/${course.id}/overview`} className="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-lg hover:border-[#000080] dark:hover:border-[#0D9488] transition-all">
+                <div className="h-32 bg-gradient-to-br from-[#000080] to-blue-900 relative p-4 flex flex-col justify-between">
+                  <span className="self-start bg-white/20 backdrop-blur-md text-white px-2 py-1 rounded text-xs font-bold tracking-wider uppercase">
+                    {course.track}
+                  </span>
+                  {course.status === 'completed' && <div className="absolute top-4 right-4 bg-emerald-500 text-white p-1 rounded-full"><FiCheckCircle size={20} /></div>}
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight mb-2 group-hover:text-[#000080] dark:group-hover:text-[#0D9488] transition-colors">{course.title}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{course.instructor.name}</p>
+
+                  <div className="mt-auto">
+                    {course.status === 'active' && (
+                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mb-2">
+                        <div className="bg-[#0D9488] h-2 rounded-full transition-all duration-500" style={{ width: `${courseProgress}%` }}></div>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-sm font-bold">
+                      <span className={course.status === 'completed' ? 'text-emerald-600' : 'text-slate-500'}>
+                        {course.status === 'active'
+                          ? `${courseProgress}% Complete`
+                          : course.status === 'future'
+                            ? 'STARTING SOON'
+                            : 'COMPLETED'}
+                      </span>
+                      {course.status === 'active' && <span className="text-[#000080] dark:text-[#0D9488] flex items-center gap-1">Resume <FiPlay size={14} /></span>}
                     </div>
-                  )}
-                  <div className="flex justify-between items-center text-sm font-bold">
-                    <span className={course.status === 'completed' ? 'text-emerald-600' : 'text-slate-500'}>
-                      {course.status === 'active'
-                        ? `${courseProgress}% Complete`
-                        : course.status === 'future'
-                          ? 'STARTING SOON'
-                          : 'COMPLETED'}
-                    </span>
-                    {course.status === 'active' && <span className="text-[#000080] dark:text-[#0D9488] flex items-center gap-1">Resume <FiPlay size={14} /></span>}
                   </div>
                 </div>
-              </div>
-            </Link>
-          )})}
+              </Link>
+            );
+          })}
         </div>
 
       </div>

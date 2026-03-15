@@ -111,7 +111,7 @@ function LMSDashboard() {
 						return (
 						<Link
 							key={course.id}
-							to={`/course/${course.id}/home`}
+							to={`/course/${course.id}/overview`}
 							className="group block bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm hover:shadow-md transition-all overflow-hidden"
 						>
 							<div className="h-40 relative overflow-hidden bg-slate-200 dark:bg-slate-800">
@@ -138,14 +138,14 @@ function LMSDashboard() {
 										<div className="group/tooltip relative">
 											<button
 												type="button"
-												aria-label="Open syllabus"
-												title="Open syllabus"
+												aria-label="Download syllabus"
+												title="Download syllabus"
 												className="rounded border border-slate-300 p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
 											>
 												<FiBook size={16} />
 											</button>
 											<span className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-200 bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-sm transition-opacity group-hover/tooltip:opacity-100 dark:border-slate-700 dark:bg-slate-100 dark:text-slate-900">
-												Open syllabus
+												Download syllabus
 											</span>
 										</div>
 										<div className="group/tooltip relative">

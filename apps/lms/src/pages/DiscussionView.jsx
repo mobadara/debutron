@@ -150,13 +150,13 @@ export default function DiscussionView() {
     const textToRead = cleanTextForSpeech(rawText);
     const utterance = new SpeechSynthesisUtterance(textToRead);
     
-    utterance.rate = 0.85; 
-    utterance.volume = 1.0; 
+    utterance.rate = 0.8; 
+    utterance.volume = 0.95; 
     utterance.pitch = 1.0; 
 
     const preferredVoices = [
       'Google UK English Female', 
-      'Google US English', 
+      'Microsoft Aria',
       'Microsoft Zira', 
       'Samantha',       
       'Karen',          
@@ -178,7 +178,12 @@ export default function DiscussionView() {
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
     }
+
+    document.querySelectorAll('video, audio').forEach((mediaElement) => {
+      mediaElement.pause();
+    });
 
     utterance.onend = () => {
       setReadingId(null);

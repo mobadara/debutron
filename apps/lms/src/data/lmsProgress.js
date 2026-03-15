@@ -80,8 +80,26 @@ const resolveItemLockedState = (item, lessonProgress) => {
   return Boolean(item.locked) || isWaitingForPrerequisite
 }
 
+export const isLessonDisabled = (lesson) => {
+  if (lesson?.disabled === true) {
+    return true
+  }
+
+  if (!lesson.availableFrom) {
+    return false
+  }
+
+  const availabilityDate = new Date(lesson.availableFrom)
+  if (Number.isNaN(availabilityDate.getTime())) {
+    return false
+  }
+
+  return availabilityDate > new Date()
+}
+
 export const getResolvedLesson = (courseId, lesson, lessonProgress = getLessonProgress(courseId, lesson.id)) => ({
   ...lesson,
+  disabled: isLessonDisabled(lesson),
   items: lesson.items.map((item) => ({
     ...item,
     locked: resolveItemLockedState(item, lessonProgress),
@@ -98,6 +116,10 @@ export const getCourseCompletionStats = (course) => {
   let totalItems = 0
 
   course.lessons.forEach((lesson) => {
+    if (isLessonDisabled(lesson)) {
+      return
+    }
+
     const lessonProgress = getLessonProgress(course.id, lesson.id)
     totalItems += lesson.items.length
     lessonProgress.completedItemIds.forEach((itemId) => completedItemIds.add(`${lesson.id}:${itemId}`))
